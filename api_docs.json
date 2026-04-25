@@ -48,6 +48,48 @@
         }
       }
     },
+    "/api/v1/models/demand-forecast": {
+      "post": {
+        "tags": [
+          "M-B1: Demand Forecasting"
+        ],
+        "summary": "M-B1 - Nisha revenue prognozi",
+        "description": "Berilgan nisha va shahar uchun 12/24/36 oylik revenue forecast hisoblaydi. Natijada ishonch intervali bilan oyma-oy prognoz qaytadi.",
+        "operationId": "demand_forecast_api_v1_models_demand_forecast_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DemandForecastRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DemandForecastResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/data/niches": {
       "get": {
         "tags": [
@@ -154,24 +196,6 @@
               "title": "Mcc Code"
             },
             "description": "MCC kod (4 raqam)"
-          },
-          {
-            "name": "niche",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Biznes nishasi (masalan: restoran)",
-              "title": "Niche"
-            },
-            "description": "Biznes nishasi (masalan: restoran)"
           }
         ],
         "responses": {
@@ -212,15 +236,17 @@
         "operationId": "get_competitors_api_v1_data_competitors_get",
         "parameters": [
           {
-            "name": "niche",
+            "name": "mcc_code",
             "in": "query",
             "required": true,
             "schema": {
               "type": "string",
-              "description": "Biznes nishasi (masalan: restoran)",
-              "title": "Niche"
+              "minLength": 4,
+              "maxLength": 4,
+              "description": "MCC kod (4 raqam)",
+              "title": "Mcc Code"
             },
-            "description": "Biznes nishasi (masalan: restoran)"
+            "description": "MCC kod (4 raqam)"
           },
           {
             "name": "lat",
@@ -676,15 +702,17 @@
         "operationId": "get_market_estimates_api_v1_data_market_estimates_get",
         "parameters": [
           {
-            "name": "niche",
+            "name": "mcc_code",
             "in": "query",
             "required": true,
             "schema": {
               "type": "string",
-              "description": "Biznes nishasi",
-              "title": "Niche"
+              "minLength": 4,
+              "maxLength": 4,
+              "description": "MCC kod (4 raqam)",
+              "title": "Mcc Code"
             },
-            "description": "Biznes nishasi"
+            "description": "MCC kod (4 raqam)"
           },
           {
             "name": "city",
@@ -757,15 +785,17 @@
         "operationId": "get_market_estimate_by_location_api_v1_data_market_estimates_by_location_get",
         "parameters": [
           {
-            "name": "niche",
+            "name": "mcc_code",
             "in": "query",
             "required": true,
             "schema": {
               "type": "string",
-              "description": "Biznes nishasi",
-              "title": "Niche"
+              "minLength": 4,
+              "maxLength": 4,
+              "description": "MCC kod (4 raqam)",
+              "title": "Mcc Code"
             },
-            "description": "Biznes nishasi"
+            "description": "MCC kod (4 raqam)"
           },
           {
             "name": "lat",
@@ -983,9 +1013,9 @@
       },
       "CompetitorListOut": {
         "properties": {
-          "niche": {
+          "mcc_code": {
             "type": "string",
-            "title": "Niche"
+            "title": "Mcc Code"
           },
           "lat": {
             "type": "number",
@@ -1013,7 +1043,7 @@
         },
         "type": "object",
         "required": [
-          "niche",
+          "mcc_code",
           "lat",
           "lon",
           "radius_m",
@@ -1245,6 +1275,225 @@
         ],
         "title": "CustomerSegmentOut"
       },
+      "DemandForecastPointOut": {
+        "properties": {
+          "forecast_month": {
+            "type": "string",
+            "format": "date",
+            "title": "Forecast Month"
+          },
+          "horizon_index": {
+            "type": "integer",
+            "title": "Horizon Index"
+          },
+          "predicted_revenue_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Predicted Revenue Uzs"
+          },
+          "lower_revenue_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Lower Revenue Uzs"
+          },
+          "upper_revenue_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Upper Revenue Uzs"
+          },
+          "trend_component_uzs": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Trend Component Uzs"
+          },
+          "seasonal_component_uzs": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seasonal Component Uzs"
+          },
+          "confidence_level": {
+            "type": "number",
+            "title": "Confidence Level"
+          }
+        },
+        "type": "object",
+        "required": [
+          "forecast_month",
+          "horizon_index",
+          "predicted_revenue_uzs",
+          "lower_revenue_uzs",
+          "upper_revenue_uzs",
+          "confidence_level"
+        ],
+        "title": "DemandForecastPointOut"
+      },
+      "DemandForecastRequest": {
+        "properties": {
+          "niche": {
+            "type": "string",
+            "title": "Niche",
+            "description": "Biznes nishasi (masalan: 'Restoran')"
+          },
+          "mcc_code": {
+            "type": "string",
+            "maxLength": 4,
+            "minLength": 4,
+            "title": "Mcc Code",
+            "description": "MCC kod (4 raqam)"
+          },
+          "city": {
+            "type": "string",
+            "title": "City",
+            "description": "Shahar nomi",
+            "default": "Toshkent"
+          },
+          "horizon_months": {
+            "type": "integer",
+            "title": "Horizon Months",
+            "description": "Prognoz gorizonti: 12, 24 yoki 36 oy",
+            "default": 12
+          },
+          "confidence_level": {
+            "type": "number",
+            "maximum": 0.99,
+            "minimum": 0.8,
+            "title": "Confidence Level",
+            "description": "Ishonch intervali darajasi",
+            "default": 0.95
+          },
+          "start_month": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Month",
+            "description": "Tarixiy qator boshlanish oyi (YYYY-MM-01)"
+          },
+          "end_month": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Month",
+            "description": "Tarixiy qator tugash oyi (YYYY-MM-01)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "niche",
+          "mcc_code"
+        ],
+        "title": "DemandForecastRequest"
+      },
+      "DemandForecastResponse": {
+        "properties": {
+          "niche": {
+            "type": "string",
+            "title": "Niche"
+          },
+          "mcc_code": {
+            "type": "string",
+            "title": "Mcc Code"
+          },
+          "city": {
+            "type": "string",
+            "title": "City"
+          },
+          "horizon_months": {
+            "type": "integer",
+            "title": "Horizon Months"
+          },
+          "confidence_level": {
+            "type": "number",
+            "title": "Confidence Level"
+          },
+          "confidence_score": {
+            "type": "number",
+            "title": "Confidence Score"
+          },
+          "training_sample_size": {
+            "type": "integer",
+            "title": "Training Sample Size"
+          },
+          "train_mape_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Train Mape Pct"
+          },
+          "train_rmse_uzs": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Train Rmse Uzs"
+          },
+          "analysis_summary": {
+            "type": "string",
+            "title": "Analysis Summary"
+          },
+          "methodology_notes": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Methodology Notes"
+          },
+          "points": {
+            "items": {
+              "$ref": "#/components/schemas/DemandForecastPointOut"
+            },
+            "type": "array",
+            "title": "Points"
+          }
+        },
+        "type": "object",
+        "required": [
+          "niche",
+          "mcc_code",
+          "city",
+          "horizon_months",
+          "confidence_level",
+          "confidence_score",
+          "training_sample_size",
+          "analysis_summary",
+          "methodology_notes",
+          "points"
+        ],
+        "title": "DemandForecastResponse"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -1386,11 +1635,6 @@
       },
       "MarketSizingRequest": {
         "properties": {
-          "niche": {
-            "type": "string",
-            "title": "Niche",
-            "description": "Biznes nishasi (masalan: 'restoran')"
-          },
           "mcc_code": {
             "type": "string",
             "maxLength": 4,
@@ -1451,7 +1695,6 @@
         },
         "type": "object",
         "required": [
-          "niche",
           "mcc_code",
           "lat",
           "lon",
@@ -1461,9 +1704,9 @@
       },
       "MarketSizingResponse": {
         "properties": {
-          "niche": {
+          "mcc_code": {
             "type": "string",
-            "title": "Niche"
+            "title": "Mcc Code"
           },
           "city": {
             "type": "string",
@@ -1555,7 +1798,7 @@
         },
         "type": "object",
         "required": [
-          "niche",
+          "mcc_code",
           "city",
           "tam_uzs",
           "sam_uzs",
