@@ -15,14 +15,13 @@ export const MarketSizingForm: React.FC = () => {
   const handleAnalyze = () => {
     store.setResult(null); // Clear previous results
     analyze({
-      niche: store.niche,
       mcc_code: store.mcc_code,
       lat: store.lat,
       lon: store.lon,
       radius_m: store.radius_m,
       city: store.city,
       capital_uzs: store.capital_uzs || 0,
-      year: store.year
+      year: store.year,
     }, {
       onSuccess: (data) => {
         store.setResult(data);

@@ -8,7 +8,6 @@ export interface MCCCategoryOut {
 }
 
 export interface MarketSizingRequest {
-  niche: string;
   mcc_code: string;
   lat: number;
   lon: number;
@@ -18,8 +17,19 @@ export interface MarketSizingRequest {
   year?: number;
 }
 
+export interface MethodologyNotes {
+  tam_bottom_up_uzs?: string | number;
+  tam_top_down_uzs?: string | number;
+  sam_bottom_up_uzs?: string | number;
+  sam_top_down_uzs?: string | number;
+  bayesian_weight_top_down?: number;
+  market_share_formula?: string;
+  calculation_date?: string;
+  [key: string]: string | number | boolean | null | undefined;
+}
+
 export interface MarketSizingResponse {
-  niche: string;
+  mcc_code: string;
   city: string;
   tam_uzs: string;
   sam_uzs: string;
@@ -36,7 +46,7 @@ export interface MarketSizingResponse {
   competitor_count_radius: number;
   confidence_score: number;
   data_weight: number;
-  methodology_notes: Record<string, any>;
+  methodology_notes: MethodologyNotes;
   analysis_summary: string;
   from_cache?: boolean;
 }
@@ -75,7 +85,7 @@ export interface CompetitorOut {
 }
 
 export interface CompetitorListOut {
-  niche: string;
+  mcc_code: string;
   lat: number;
   lon: number;
   radius_m: number;
