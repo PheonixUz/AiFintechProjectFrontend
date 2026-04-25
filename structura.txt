@@ -1,0 +1,145 @@
+AiFintechProjectFrontend/
+│
+├── public/
+│   ├── favicon.ico
+│   ├── logo.svg
+│   └── fonts/
+│       └── Inter-Variable.woff2
+│
+├── src/
+│   ├── main.tsx                          # Entry point
+│   ├── App.tsx                           # Root component, router setup
+│   ├── index.css                         # Global styles, CSS variables, design tokens
+│   ├── vite-env.d.ts                     # Vite type declarations
+│   │
+│   ├── config/
+│   │   ├── api.ts                        # API base URL, endpoints
+│   │   ├── constants.ts                  # App constants (cities, default values)
+│   │   └── mapConfig.ts                  # Map default center, zoom, tile layers
+│   │
+│   ├── types/
+│   │   ├── api.types.ts                  # API request/response type definitions
+│   │   ├── market.types.ts               # Market sizing related types
+│   │   ├── geo.types.ts                  # Geo/location related types
+│   │   └── ui.types.ts                   # UI component prop types
+│   │
+│   ├── api/
+│   │   ├── httpClient.ts                 # Axios instance, interceptors, error handling
+│   │   ├── marketSizing.api.ts           # POST /api/v1/models/market-sizing
+│   │   ├── niches.api.ts                 # GET  /api/v1/data/niches
+│   │   ├── benchmarks.api.ts             # GET  /api/v1/data/benchmarks
+│   │   ├── competitors.api.ts            # GET  /api/v1/data/competitors
+│   │   ├── transactions.api.ts           # GET  /api/v1/data/transactions
+│   │   ├── population.api.ts             # GET  /api/v1/data/population
+│   │   ├── poi.api.ts                    # GET  /api/v1/data/poi
+│   │   ├── customerSegments.api.ts       # GET  /api/v1/data/customer-segments
+│   │   ├── marketEstimates.api.ts        # GET  /api/v1/data/market-estimates
+│   │   └── health.api.ts                 # GET  /health
+│   │
+│   ├── hooks/
+│   │   ├── useMarketSizing.ts            # Market sizing form + mutation
+│   │   ├── useNiches.ts                  # Niche list fetch
+│   │   ├── useBenchmarks.ts              # Benchmark data fetch
+│   │   ├── useCompetitors.ts             # Competitors data fetch
+│   │   ├── useTransactions.ts            # Transaction stats fetch
+│   │   ├── usePopulation.ts              # Population zones fetch
+│   │   ├── usePOI.ts                     # POI data fetch
+│   │   ├── useCustomerSegments.ts        # Customer segments fetch
+│   │   ├── useMarketEstimates.ts         # Saved estimates fetch
+│   │   ├── useMapInteraction.ts          # Map click → lat/lon extraction
+│   │   └── useDebounce.ts               # Input debounce utility
+│   │
+│   ├── store/
+│   │   ├── analysisStore.ts              # Zustand: current analysis state
+│   │   └── uiStore.ts                    # Zustand: sidebar, theme, modal states
+│   │
+│   ├── components/
+│   │   ├── layout/
+│   │   │   ├── AppLayout.tsx             # Main layout (sidebar + content)
+│   │   │   ├── Sidebar.tsx               # Navigation sidebar (blocks A-G)
+│   │   │   ├── TopBar.tsx                # Top header bar, user info, theme toggle
+│   │   │   └── Footer.tsx                # Footer component
+│   │   │
+│   │   ├── ui/
+│   │   │   ├── Button.tsx                # Reusable button
+│   │   │   ├── Card.tsx                  # Glass card component
+│   │   │   ├── Input.tsx                 # Form input
+│   │   │   ├── Select.tsx                # Dropdown select
+│   │   │   ├── Slider.tsx                # Range slider (radius)
+│   │   │   ├── Badge.tsx                 # Status/tag badge
+│   │   │   ├── Tooltip.tsx               # Tooltip component
+│   │   │   ├── Modal.tsx                 # Modal dialog
+│   │   │   ├── Loader.tsx                # Loading spinner/skeleton
+│   │   │   ├── EmptyState.tsx            # Empty state placeholder
+│   │   │   ├── ErrorBoundary.tsx         # Error boundary wrapper
+│   │   │   └── AnimatedCounter.tsx       # Animated number counter
+│   │   │
+│   │   ├── charts/
+│   │   │   ├── TAMSAMSOMChart.tsx        # Funnel/bar chart for TAM/SAM/SOM
+│   │   │   ├── MonthlyTrendChart.tsx     # Line chart for monthly transactions
+│   │   │   ├── CompetitorDistribution.tsx # Pie/donut chart for competitors
+│   │   │   ├── BenchmarkRadar.tsx        # Radar chart for benchmark comparison
+│   │   │   ├── PopulationBar.tsx         # Bar chart for population zones
+│   │   │   ├── SegmentDonut.tsx          # Donut chart for customer segments
+│   │   │   ├── ConfidenceGauge.tsx       # Gauge chart for confidence score
+│   │   │   └── GrowthSparkline.tsx       # Sparkline for growth trend
+│   │   │
+│   │   ├── map/
+│   │   │   ├── MapContainer.tsx          # Leaflet map wrapper
+│   │   │   ├── MapMarker.tsx             # Custom map marker
+│   │   │   ├── RadiusCircle.tsx          # Radius overlay on map
+│   │   │   ├── CompetitorMarkers.tsx     # Competitor location markers
+│   │   │   ├── POIMarkers.tsx            # POI location markers
+│   │   │   └── HeatmapLayer.tsx          # Population/spending heatmap
+│   │   │
+│   │   └── shared/
+│   │       ├── NicheSelector.tsx         # MCC category selector (search + filter)
+│   │       ├── CitySelector.tsx          # City dropdown
+│   │       ├── LocationPicker.tsx        # Map-based location picker
+│   │       ├── RadiusControl.tsx         # Radius slider + input
+│   │       ├── ResultSummaryCard.tsx     # Summary card for analysis results
+│   │       └── MetricCard.tsx            # Single metric display card
+│   │
+│   ├── pages/
+│   │   ├── DashboardPage.tsx             # Main dashboard / home
+│   │   ├── MarketSizingPage.tsx          # M-A1: Market Sizing full page
+│   │   ├── DataExplorerPage.tsx          # Browse raw data (niches, benchmarks, etc.)
+│   │   ├── HistoryPage.tsx               # Saved market estimates history
+│   │   └── NotFoundPage.tsx              # 404 page
+│   │
+│   ├── features/
+│   │   └── market-sizing/                # M-A1: Market Sizing feature module
+│   │       ├── MarketSizingForm.tsx      # Input form (niche, location, capital, etc.)
+│   │       ├── MarketSizingResults.tsx   # Results display panel
+│   │       ├── TAMSAMSOMSection.tsx      # TAM/SAM/SOM breakdown section
+│   │       ├── CompetitorSection.tsx     # Competitor analysis section
+│   │       ├── BenchmarkSection.tsx      # Industry benchmark section
+│   │       ├── PopulationSection.tsx     # Population & demographics section
+│   │       ├── CustomerSegmentSection.tsx # Customer segment insights
+│   │       ├── TransactionSection.tsx    # Transaction stats section
+│   │       ├── AnalysisSummary.tsx       # AI-generated analysis summary
+│   │       └── ExportReport.tsx          # PDF/CSV export functionality
+│   │
+│   └── utils/
+│       ├── formatCurrency.ts             # UZS/USD formatting with abbreviations
+│       ├── formatNumber.ts               # Number formatting (K, M, B)
+│       ├── colorScale.ts                 # Dynamic color generation for charts
+│       ├── geoUtils.ts                   # Geo calculations (distance, bounds)
+│       └── validators.ts                 # Form validation schemas
+│
+├── docs/
+│   ├── MODULS.md                         # All 35 AI models catalog
+│   └── API_ENDPOINTS.md                  # API endpoints summary
+│
+├── api_docs.json                         # OpenAPI spec (backend reference)
+├── structura.txt                         # This file — project structure
+├── README.md                             # Project documentation
+├── Plan.md                               # Implementation plan
+├── index.html                            # Vite HTML entry
+├── package.json                          # Dependencies
+├── vite.config.ts                        # Vite configuration
+├── tsconfig.json                         # TypeScript configuration
+├── tsconfig.app.json                     # App-specific TS config
+├── tsconfig.node.json                    # Node-specific TS config
+├── .env.example                          # Environment variables template
+└── .gitignore                            # Git ignore rules

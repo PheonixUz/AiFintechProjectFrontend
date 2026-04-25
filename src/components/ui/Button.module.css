@@ -1,0 +1,110 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 500;
+  font-family: inherit;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  outline: none;
+  white-space: nowrap;
+}
+
+.button:focus-visible {
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-primary);
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+/* Sizes */
+.size-sm {
+  padding: 6px 12px;
+  font-size: 0.875rem;
+  height: 32px;
+}
+
+.size-md {
+  padding: 8px 16px;
+  font-size: 0.9375rem;
+  height: 40px;
+}
+
+.size-lg {
+  padding: 12px 24px;
+  font-size: 1rem;
+  height: 48px;
+}
+
+/* Variants */
+.variant-primary {
+  background: var(--accent-gradient);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 14px 0 rgba(59, 130, 246, 0.39);
+}
+
+.variant-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.23);
+  background: var(--accent-primary-hover); /* fallback */
+  background: linear-gradient(135deg, #2563EB 0%, #7C3AED 100%);
+}
+
+.variant-primary:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.variant-secondary {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--border-light);
+}
+
+.variant-secondary:hover:not(:disabled) {
+  background: var(--bg-glass-hover);
+  border-color: var(--text-muted);
+}
+
+.variant-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.variant-ghost:hover:not(:disabled) {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.variant-danger {
+  background: var(--danger);
+  color: white;
+}
+
+.variant-danger:hover:not(:disabled) {
+  background: #DC2626;
+}
+
+/* Loaders and Icons */
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+}

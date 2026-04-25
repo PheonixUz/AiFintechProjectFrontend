@@ -1,0 +1,1936 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "AI Fintech Platform",
+    "description": "KMB AI Business Analysis Platform — M-A1 Market Sizing",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/v1/models/market-sizing": {
+      "post": {
+        "tags": [
+          "M-A1: Market Sizing"
+        ],
+        "summary": "M-A1 — Bozor hajmini hisoblash (TAM / SAM / SOM)",
+        "description": "Berilgan biznes nishasi va GPS koordinatasi uchun TAM/SAM/SOM hisoblaydi. Bank tranzaksiyalari + sanoat benchmarklari asosida Bayesian + bottom-up.",
+        "operationId": "market_sizing_api_v1_models_market_sizing_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarketSizingRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarketSizingResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/data/niches": {
+      "get": {
+        "tags": [
+          "Data: Market ma'lumotlari"
+        ],
+        "summary": "Barcha biznes nishalari (MCC kategoriyalar)",
+        "description": "Tizimda mavjud barcha MCC kategoriyalar va ularning o'zbekcha nomlari.",
+        "operationId": "get_niches_api_v1_data_niches_get",
+        "parameters": [
+          {
+            "name": "active_only",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Faqat faol kategoriyalar",
+              "default": true,
+              "title": "Active Only"
+            },
+            "description": "Faqat faol kategoriyalar"
+          },
+          {
+            "name": "parent_category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Yuqori kategoriya filtri",
+              "title": "Parent Category"
+            },
+            "description": "Yuqori kategoriya filtri"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MCCCategoryOut"
+                  },
+                  "title": "Response Get Niches Api V1 Data Niches Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/data/benchmarks": {
+      "get": {
+        "tags": [
+          "Data: Market ma'lumotlari"
+        ],
+        "summary": "Nisha sanoat benchmarklari",
+        "description": "Berilgan shahar va nisha uchun o'rtacha daromad, margin, xodimlar soni va o'sish ko'rsatkichlarini qaytaradi.",
+        "operationId": "get_benchmarks_api_v1_data_benchmarks_get",
+        "parameters": [
+          {
+            "name": "city",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Shahar nomi",
+              "default": "Toshkent",
+              "title": "City"
+            },
+            "description": "Shahar nomi"
+          },
+          {
+            "name": "mcc_code",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "MCC kod (4 raqam)",
+              "title": "Mcc Code"
+            },
+            "description": "MCC kod (4 raqam)"
+          },
+          {
+            "name": "niche",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Biznes nishasi (masalan: restoran)",
+              "title": "Niche"
+            },
+            "description": "Biznes nishasi (masalan: restoran)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BenchmarkOut"
+                  },
+                  "title": "Response Get Benchmarks Api V1 Data Benchmarks Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/data/competitors": {
+      "get": {
+        "tags": [
+          "Data: Market ma'lumotlari"
+        ],
+        "summary": "Radius ichidagi raqobatchilar",
+        "description": "Berilgan koordinata va radius ichidagi faol raqobatchilarni masofasi bilan birga qaytaradi.",
+        "operationId": "get_competitors_api_v1_data_competitors_get",
+        "parameters": [
+          {
+            "name": "niche",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Biznes nishasi (masalan: restoran)",
+              "title": "Niche"
+            },
+            "description": "Biznes nishasi (masalan: restoran)"
+          },
+          {
+            "name": "lat",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "maximum": 90,
+              "minimum": -90,
+              "description": "Kenglik (latitude)",
+              "title": "Lat"
+            },
+            "description": "Kenglik (latitude)"
+          },
+          {
+            "name": "lon",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "maximum": 180,
+              "minimum": -180,
+              "description": "Uzunlik (longitude)",
+              "title": "Lon"
+            },
+            "description": "Uzunlik (longitude)"
+          },
+          {
+            "name": "radius_m",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "maximum": 10000,
+              "minimum": 100,
+              "description": "Radius (metr)",
+              "default": 1000,
+              "title": "Radius M"
+            },
+            "description": "Radius (metr)"
+          },
+          {
+            "name": "active_only",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Faqat faol bizneslar",
+              "default": true,
+              "title": "Active Only"
+            },
+            "description": "Faqat faol bizneslar"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompetitorListOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/data/transactions": {
+      "get": {
+        "tags": [
+          "Data: Market ma'lumotlari"
+        ],
+        "summary": "MCC kategoriya bo'yicha tranzaksiya statistikasi",
+        "description": "Berilgan MCC kod va shahar uchun yillik tranzaksiya yig'indisi va oyma-oy taqsimotini qaytaradi. TAM hisoblash uchun asosiy ma'lumot.",
+        "operationId": "get_transactions_api_v1_data_transactions_get",
+        "parameters": [
+          {
+            "name": "mcc_code",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 4,
+              "maxLength": 4,
+              "description": "MCC kod (4 raqam)",
+              "title": "Mcc Code"
+            },
+            "description": "MCC kod (4 raqam)"
+          },
+          {
+            "name": "city",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Shahar nomi",
+              "default": "Toshkent",
+              "title": "City"
+            },
+            "description": "Shahar nomi"
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 2030,
+              "minimum": 2020,
+              "description": "Yil",
+              "default": 2025,
+              "title": "Year"
+            },
+            "description": "Yil"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionSummaryOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/data/population": {
+      "get": {
+        "tags": [
+          "Data: Market ma'lumotlari"
+        ],
+        "summary": "Radius ichidagi aholi zonalari",
+        "description": "Berilgan koordinata va radius ichidagi aholi zonalarini qaytaradi. Bottom-up TAM hisoblash uchun: aholi ×침투stavka × o'rtacha xarajat.",
+        "operationId": "get_population_api_v1_data_population_get",
+        "parameters": [
+          {
+            "name": "lat",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "maximum": 90,
+              "minimum": -90,
+              "description": "Kenglik (latitude)",
+              "title": "Lat"
+            },
+            "description": "Kenglik (latitude)"
+          },
+          {
+            "name": "lon",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "maximum": 180,
+              "minimum": -180,
+              "description": "Uzunlik (longitude)",
+              "title": "Lon"
+            },
+            "description": "Uzunlik (longitude)"
+          },
+          {
+            "name": "radius_m",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "maximum": 20000,
+              "minimum": 100,
+              "description": "Radius (metr)",
+              "default": 1000,
+              "title": "Radius M"
+            },
+            "description": "Radius (metr)"
+          },
+          {
+            "name": "city",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Shahar nomi filtri",
+              "title": "City"
+            },
+            "description": "Shahar nomi filtri"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PopulationListOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/data/poi": {
+      "get": {
+        "tags": [
+          "Data: Market ma'lumotlari"
+        ],
+        "summary": "Radius ichidagi qiziqish nuqtalari (POI)",
+        "description": "Bozor, masjid, maktab, savdo markazi kabi qiziqish nuqtalarini masofasi bilan birga qaytaradi. M-C1 lokatsiya skori uchun.",
+        "operationId": "get_poi_api_v1_data_poi_get",
+        "parameters": [
+          {
+            "name": "lat",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "maximum": 90,
+              "minimum": -90,
+              "description": "Kenglik (latitude)",
+              "title": "Lat"
+            },
+            "description": "Kenglik (latitude)"
+          },
+          {
+            "name": "lon",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "maximum": 180,
+              "minimum": -180,
+              "description": "Uzunlik (longitude)",
+              "title": "Lon"
+            },
+            "description": "Uzunlik (longitude)"
+          },
+          {
+            "name": "radius_m",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "maximum": 5000,
+              "minimum": 100,
+              "description": "Radius (metr)",
+              "default": 500,
+              "title": "Radius M"
+            },
+            "description": "Radius (metr)"
+          },
+          {
+            "name": "poi_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "POI turi: market, mosque, school, mall, park, hospital, university, transport_hub",
+              "title": "Poi Type"
+            },
+            "description": "POI turi: market, mosque, school, mall, park, hospital, university, transport_hub"
+          },
+          {
+            "name": "city",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Shahar nomi filtri",
+              "title": "City"
+            },
+            "description": "Shahar nomi filtri"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/POIListOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/data/customer-segments": {
+      "get": {
+        "tags": [
+          "Data: Market ma'lumotlari"
+        ],
+        "summary": "Radius ichidagi mijoz segmentlari",
+        "description": "Berilgan koordinata atrofidagi mijoz segmentlarini qaytaradi. SOM hisoblashda target segment penetration rate uchun ishlatiladi.",
+        "operationId": "get_customer_segments_api_v1_data_customer_segments_get",
+        "parameters": [
+          {
+            "name": "lat",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "maximum": 90,
+              "minimum": -90,
+              "description": "Kenglik (latitude)",
+              "title": "Lat"
+            },
+            "description": "Kenglik (latitude)"
+          },
+          {
+            "name": "lon",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "maximum": 180,
+              "minimum": -180,
+              "description": "Uzunlik (longitude)",
+              "title": "Lon"
+            },
+            "description": "Uzunlik (longitude)"
+          },
+          {
+            "name": "radius_m",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "maximum": 10000,
+              "minimum": 100,
+              "description": "Radius (metr)",
+              "default": 1000,
+              "title": "Radius M"
+            },
+            "description": "Radius (metr)"
+          },
+          {
+            "name": "city",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Shahar nomi filtri",
+              "title": "City"
+            },
+            "description": "Shahar nomi filtri"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerSegmentListOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/data/market-estimates": {
+      "get": {
+        "tags": [
+          "Data: Market ma'lumotlari"
+        ],
+        "summary": "Saqlangan TAM/SAM/SOM tahminlari",
+        "description": "Oldingi hisoblashlardan saqlangan bozor tahminlarini qaytaradi. Bir xil so'rovlar uchun qayta hisoblashdan saqlanish uchun ishlatiladi.",
+        "operationId": "get_market_estimates_api_v1_data_market_estimates_get",
+        "parameters": [
+          {
+            "name": "niche",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Biznes nishasi",
+              "title": "Niche"
+            },
+            "description": "Biznes nishasi"
+          },
+          {
+            "name": "city",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Shahar nomi filtri",
+              "title": "City"
+            },
+            "description": "Shahar nomi filtri"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 50,
+              "minimum": 1,
+              "description": "Natijalar soni",
+              "default": 10,
+              "title": "Limit"
+            },
+            "description": "Natijalar soni"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MarketEstimateOut"
+                  },
+                  "title": "Response Get Market Estimates Api V1 Data Market Estimates Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/data/market-estimates/by-location": {
+      "get": {
+        "tags": [
+          "Data: Market ma'lumotlari"
+        ],
+        "summary": "Lokatsiya bo'yicha TAM/SAM/SOM tahmini",
+        "description": "Berilgan koordinata, radius va nisha uchun eng so'nggi saqlangan tahminni qaytaradi.",
+        "operationId": "get_market_estimate_by_location_api_v1_data_market_estimates_by_location_get",
+        "parameters": [
+          {
+            "name": "niche",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Biznes nishasi",
+              "title": "Niche"
+            },
+            "description": "Biznes nishasi"
+          },
+          {
+            "name": "lat",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "maximum": 90,
+              "minimum": -90,
+              "description": "Kenglik (latitude)",
+              "title": "Lat"
+            },
+            "description": "Kenglik (latitude)"
+          },
+          {
+            "name": "lon",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "maximum": 180,
+              "minimum": -180,
+              "description": "Uzunlik (longitude)",
+              "title": "Lon"
+            },
+            "description": "Uzunlik (longitude)"
+          },
+          {
+            "name": "radius_m",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "maximum": 10000,
+              "minimum": 100,
+              "description": "Radius (metr)",
+              "default": 1000,
+              "title": "Radius M"
+            },
+            "description": "Radius (metr)"
+          },
+          {
+            "name": "calculation_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Hisoblash sanasi (YYYY-MM-DD)",
+              "title": "Calculation Date"
+            },
+            "description": "Hisoblash sanasi (YYYY-MM-DD)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/MarketEstimateOut"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Response Get Market Estimate By Location Api V1 Data Market Estimates By Location Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "summary": "Health",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Health Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BenchmarkOut": {
+        "properties": {
+          "mcc_code": {
+            "type": "string",
+            "title": "Mcc Code"
+          },
+          "niche": {
+            "type": "string",
+            "title": "Niche"
+          },
+          "city": {
+            "type": "string",
+            "title": "City"
+          },
+          "avg_monthly_revenue_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Avg Monthly Revenue Uzs"
+          },
+          "median_monthly_revenue_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Median Monthly Revenue Uzs"
+          },
+          "p25_monthly_revenue_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "P25 Monthly Revenue Uzs"
+          },
+          "p75_monthly_revenue_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "P75 Monthly Revenue Uzs"
+          },
+          "avg_monthly_transactions": {
+            "type": "integer",
+            "title": "Avg Monthly Transactions"
+          },
+          "avg_check_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Avg Check Uzs"
+          },
+          "gross_margin_pct": {
+            "type": "number",
+            "title": "Gross Margin Pct"
+          },
+          "avg_employee_count": {
+            "type": "number",
+            "title": "Avg Employee Count"
+          },
+          "revenue_per_sqm_monthly_uzs": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revenue Per Sqm Monthly Uzs"
+          },
+          "annual_growth_rate_pct": {
+            "type": "number",
+            "title": "Annual Growth Rate Pct"
+          },
+          "data_year": {
+            "type": "integer",
+            "title": "Data Year"
+          },
+          "data_source": {
+            "type": "string",
+            "title": "Data Source"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mcc_code",
+          "niche",
+          "city",
+          "avg_monthly_revenue_uzs",
+          "median_monthly_revenue_uzs",
+          "p25_monthly_revenue_uzs",
+          "p75_monthly_revenue_uzs",
+          "avg_monthly_transactions",
+          "avg_check_uzs",
+          "gross_margin_pct",
+          "avg_employee_count",
+          "revenue_per_sqm_monthly_uzs",
+          "annual_growth_rate_pct",
+          "data_year",
+          "data_source"
+        ],
+        "title": "BenchmarkOut"
+      },
+      "CompetitorListOut": {
+        "properties": {
+          "niche": {
+            "type": "string",
+            "title": "Niche"
+          },
+          "lat": {
+            "type": "number",
+            "title": "Lat"
+          },
+          "lon": {
+            "type": "number",
+            "title": "Lon"
+          },
+          "radius_m": {
+            "type": "number",
+            "title": "Radius M"
+          },
+          "total_count": {
+            "type": "integer",
+            "title": "Total Count"
+          },
+          "competitors": {
+            "items": {
+              "$ref": "#/components/schemas/CompetitorOut"
+            },
+            "type": "array",
+            "title": "Competitors"
+          }
+        },
+        "type": "object",
+        "required": [
+          "niche",
+          "lat",
+          "lon",
+          "radius_m",
+          "total_count",
+          "competitors"
+        ],
+        "title": "CompetitorListOut"
+      },
+      "CompetitorOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "niche": {
+            "type": "string",
+            "title": "Niche"
+          },
+          "lat": {
+            "type": "number",
+            "title": "Lat"
+          },
+          "lon": {
+            "type": "number",
+            "title": "Lon"
+          },
+          "distance_m": {
+            "type": "number",
+            "title": "Distance M",
+            "default": 0
+          },
+          "district": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "District"
+          },
+          "city": {
+            "type": "string",
+            "title": "City"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "registered_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Registered Date"
+          },
+          "employee_count_est": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Employee Count Est"
+          },
+          "monthly_revenue_est_uzs": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Monthly Revenue Est Uzs"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "niche",
+          "lat",
+          "lon",
+          "district",
+          "city",
+          "is_active",
+          "registered_date",
+          "employee_count_est",
+          "monthly_revenue_est_uzs"
+        ],
+        "title": "CompetitorOut"
+      },
+      "CustomerSegmentListOut": {
+        "properties": {
+          "lat": {
+            "type": "number",
+            "title": "Lat"
+          },
+          "lon": {
+            "type": "number",
+            "title": "Lon"
+          },
+          "radius_m": {
+            "type": "number",
+            "title": "Radius M"
+          },
+          "segments_count": {
+            "type": "integer",
+            "title": "Segments Count"
+          },
+          "total_customers_est": {
+            "type": "integer",
+            "title": "Total Customers Est"
+          },
+          "segments": {
+            "items": {
+              "$ref": "#/components/schemas/CustomerSegmentOut"
+            },
+            "type": "array",
+            "title": "Segments"
+          }
+        },
+        "type": "object",
+        "required": [
+          "lat",
+          "lon",
+          "radius_m",
+          "segments_count",
+          "total_customers_est",
+          "segments"
+        ],
+        "title": "CustomerSegmentListOut"
+      },
+      "CustomerSegmentOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "segment_name": {
+            "type": "string",
+            "title": "Segment Name"
+          },
+          "district": {
+            "type": "string",
+            "title": "District"
+          },
+          "city": {
+            "type": "string",
+            "title": "City"
+          },
+          "lat": {
+            "type": "number",
+            "title": "Lat"
+          },
+          "lon": {
+            "type": "number",
+            "title": "Lon"
+          },
+          "radius_m": {
+            "type": "number",
+            "title": "Radius M"
+          },
+          "avg_monthly_spending_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Avg Monthly Spending Uzs"
+          },
+          "purchase_frequency_monthly": {
+            "type": "number",
+            "title": "Purchase Frequency Monthly"
+          },
+          "avg_check_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Avg Check Uzs"
+          },
+          "top_mcc_categories": {
+            "items": {
+
+            },
+            "type": "array",
+            "title": "Top Mcc Categories"
+          },
+          "spending_distribution": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Spending Distribution"
+          },
+          "estimated_count": {
+            "type": "integer",
+            "title": "Estimated Count"
+          },
+          "data_year": {
+            "type": "integer",
+            "title": "Data Year"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "segment_name",
+          "district",
+          "city",
+          "lat",
+          "lon",
+          "radius_m",
+          "avg_monthly_spending_uzs",
+          "purchase_frequency_monthly",
+          "avg_check_uzs",
+          "top_mcc_categories",
+          "spending_distribution",
+          "estimated_count",
+          "data_year"
+        ],
+        "title": "CustomerSegmentOut"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "MCCCategoryOut": {
+        "properties": {
+          "mcc_code": {
+            "type": "string",
+            "title": "Mcc Code"
+          },
+          "category_name_en": {
+            "type": "string",
+            "title": "Category Name En"
+          },
+          "niche_name_uz": {
+            "type": "string",
+            "title": "Niche Name Uz"
+          },
+          "niche_name_ru": {
+            "type": "string",
+            "title": "Niche Name Ru"
+          },
+          "parent_category": {
+            "type": "string",
+            "title": "Parent Category"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mcc_code",
+          "category_name_en",
+          "niche_name_uz",
+          "niche_name_ru",
+          "parent_category",
+          "is_active"
+        ],
+        "title": "MCCCategoryOut"
+      },
+      "MarketEstimateOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "niche": {
+            "type": "string",
+            "title": "Niche"
+          },
+          "mcc_code": {
+            "type": "string",
+            "title": "Mcc Code"
+          },
+          "city": {
+            "type": "string",
+            "title": "City"
+          },
+          "lat": {
+            "type": "number",
+            "title": "Lat"
+          },
+          "lon": {
+            "type": "number",
+            "title": "Lon"
+          },
+          "radius_m": {
+            "type": "number",
+            "title": "Radius M"
+          },
+          "tam_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Tam Uzs"
+          },
+          "sam_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Sam Uzs"
+          },
+          "som_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Som Uzs"
+          },
+          "competitor_count": {
+            "type": "integer",
+            "title": "Competitor Count"
+          },
+          "market_growth_rate_pct": {
+            "type": "number",
+            "title": "Market Growth Rate Pct"
+          },
+          "confidence_score": {
+            "type": "number",
+            "title": "Confidence Score"
+          },
+          "calculation_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Calculation Date"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "niche",
+          "mcc_code",
+          "city",
+          "lat",
+          "lon",
+          "radius_m",
+          "tam_uzs",
+          "sam_uzs",
+          "som_uzs",
+          "competitor_count",
+          "market_growth_rate_pct",
+          "confidence_score",
+          "calculation_date",
+          "created_at"
+        ],
+        "title": "MarketEstimateOut"
+      },
+      "MarketSizingRequest": {
+        "properties": {
+          "niche": {
+            "type": "string",
+            "title": "Niche",
+            "description": "Biznes nishasi (masalan: 'restoran')"
+          },
+          "mcc_code": {
+            "type": "string",
+            "maxLength": 4,
+            "minLength": 4,
+            "title": "Mcc Code",
+            "description": "MCC kod (4 raqam)"
+          },
+          "lat": {
+            "type": "number",
+            "maximum": 90,
+            "minimum": -90,
+            "title": "Lat",
+            "description": "Kenglik (latitude)"
+          },
+          "lon": {
+            "type": "number",
+            "maximum": 180,
+            "minimum": -180,
+            "title": "Lon",
+            "description": "Uzunlik (longitude)"
+          },
+          "radius_m": {
+            "type": "number",
+            "maximum": 10000,
+            "minimum": 100,
+            "title": "Radius M",
+            "description": "Tahlil radiusi (metr)",
+            "default": 1000
+          },
+          "city": {
+            "type": "string",
+            "title": "City",
+            "description": "Shahar nomi",
+            "default": "Toshkent"
+          },
+          "capital_uzs": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              }
+            ],
+            "title": "Capital Uzs",
+            "description": "Boshlang'ich kapital (UZS)"
+          },
+          "year": {
+            "type": "integer",
+            "maximum": 2030,
+            "minimum": 2020,
+            "title": "Year",
+            "description": "Tahlil yili",
+            "default": 2025
+          }
+        },
+        "type": "object",
+        "required": [
+          "niche",
+          "mcc_code",
+          "lat",
+          "lon",
+          "capital_uzs"
+        ],
+        "title": "MarketSizingRequest"
+      },
+      "MarketSizingResponse": {
+        "properties": {
+          "niche": {
+            "type": "string",
+            "title": "Niche"
+          },
+          "city": {
+            "type": "string",
+            "title": "City"
+          },
+          "tam_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Tam Uzs"
+          },
+          "sam_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Sam Uzs"
+          },
+          "som_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Som Uzs"
+          },
+          "tam_low_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Tam Low Uzs"
+          },
+          "tam_high_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Tam High Uzs"
+          },
+          "sam_low_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Sam Low Uzs"
+          },
+          "sam_high_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Sam High Uzs"
+          },
+          "som_low_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Som Low Uzs"
+          },
+          "som_high_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Som High Uzs"
+          },
+          "market_share_pct": {
+            "type": "number",
+            "title": "Market Share Pct"
+          },
+          "market_growth_rate_pct": {
+            "type": "number",
+            "title": "Market Growth Rate Pct"
+          },
+          "gross_margin_pct": {
+            "type": "number",
+            "title": "Gross Margin Pct"
+          },
+          "competitor_count_radius": {
+            "type": "integer",
+            "title": "Competitor Count Radius"
+          },
+          "confidence_score": {
+            "type": "number",
+            "title": "Confidence Score"
+          },
+          "data_weight": {
+            "type": "number",
+            "title": "Data Weight"
+          },
+          "methodology_notes": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Methodology Notes"
+          },
+          "analysis_summary": {
+            "type": "string",
+            "title": "Analysis Summary"
+          },
+          "from_cache": {
+            "type": "boolean",
+            "title": "From Cache",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "niche",
+          "city",
+          "tam_uzs",
+          "sam_uzs",
+          "som_uzs",
+          "tam_low_uzs",
+          "tam_high_uzs",
+          "sam_low_uzs",
+          "sam_high_uzs",
+          "som_low_uzs",
+          "som_high_uzs",
+          "market_share_pct",
+          "market_growth_rate_pct",
+          "gross_margin_pct",
+          "competitor_count_radius",
+          "confidence_score",
+          "data_weight",
+          "methodology_notes",
+          "analysis_summary"
+        ],
+        "title": "MarketSizingResponse"
+      },
+      "POIListOut": {
+        "properties": {
+          "lat": {
+            "type": "number",
+            "title": "Lat"
+          },
+          "lon": {
+            "type": "number",
+            "title": "Lon"
+          },
+          "radius_m": {
+            "type": "number",
+            "title": "Radius M"
+          },
+          "poi_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Poi Type"
+          },
+          "total_count": {
+            "type": "integer",
+            "title": "Total Count"
+          },
+          "pois": {
+            "items": {
+              "$ref": "#/components/schemas/POIOut"
+            },
+            "type": "array",
+            "title": "Pois"
+          }
+        },
+        "type": "object",
+        "required": [
+          "lat",
+          "lon",
+          "radius_m",
+          "poi_type",
+          "total_count",
+          "pois"
+        ],
+        "title": "POIListOut"
+      },
+      "POIOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "poi_type": {
+            "type": "string",
+            "title": "Poi Type"
+          },
+          "lat": {
+            "type": "number",
+            "title": "Lat"
+          },
+          "lon": {
+            "type": "number",
+            "title": "Lon"
+          },
+          "distance_m": {
+            "type": "number",
+            "title": "Distance M",
+            "default": 0
+          },
+          "district": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "District"
+          },
+          "city": {
+            "type": "string",
+            "title": "City"
+          },
+          "capacity_est": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Capacity Est"
+          },
+          "daily_visitors_est": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Daily Visitors Est"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "poi_type",
+          "lat",
+          "lon",
+          "district",
+          "city",
+          "capacity_est",
+          "daily_visitors_est",
+          "is_active"
+        ],
+        "title": "POIOut"
+      },
+      "PopulationListOut": {
+        "properties": {
+          "lat": {
+            "type": "number",
+            "title": "Lat"
+          },
+          "lon": {
+            "type": "number",
+            "title": "Lon"
+          },
+          "radius_m": {
+            "type": "number",
+            "title": "Radius M"
+          },
+          "zones_count": {
+            "type": "integer",
+            "title": "Zones Count"
+          },
+          "total_population": {
+            "type": "integer",
+            "title": "Total Population"
+          },
+          "zones": {
+            "items": {
+              "$ref": "#/components/schemas/PopulationZoneOut"
+            },
+            "type": "array",
+            "title": "Zones"
+          }
+        },
+        "type": "object",
+        "required": [
+          "lat",
+          "lon",
+          "radius_m",
+          "zones_count",
+          "total_population",
+          "zones"
+        ],
+        "title": "PopulationListOut"
+      },
+      "PopulationZoneOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "zone_name": {
+            "type": "string",
+            "title": "Zone Name"
+          },
+          "district": {
+            "type": "string",
+            "title": "District"
+          },
+          "city": {
+            "type": "string",
+            "title": "City"
+          },
+          "lat": {
+            "type": "number",
+            "title": "Lat"
+          },
+          "lon": {
+            "type": "number",
+            "title": "Lon"
+          },
+          "radius_m": {
+            "type": "number",
+            "title": "Radius M"
+          },
+          "total_population": {
+            "type": "integer",
+            "title": "Total Population"
+          },
+          "working_age_population": {
+            "type": "integer",
+            "title": "Working Age Population"
+          },
+          "youth_population": {
+            "type": "integer",
+            "title": "Youth Population"
+          },
+          "avg_monthly_income_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Avg Monthly Income Uzs"
+          },
+          "avg_monthly_spending_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Avg Monthly Spending Uzs"
+          },
+          "data_year": {
+            "type": "integer",
+            "title": "Data Year"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "zone_name",
+          "district",
+          "city",
+          "lat",
+          "lon",
+          "radius_m",
+          "total_population",
+          "working_age_population",
+          "youth_population",
+          "avg_monthly_income_uzs",
+          "avg_monthly_spending_uzs",
+          "data_year"
+        ],
+        "title": "PopulationZoneOut"
+      },
+      "TransactionMonthOut": {
+        "properties": {
+          "month": {
+            "type": "integer",
+            "title": "Month"
+          },
+          "total_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Total Uzs"
+          },
+          "transaction_count": {
+            "type": "integer",
+            "title": "Transaction Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "month",
+          "total_uzs",
+          "transaction_count"
+        ],
+        "title": "TransactionMonthOut"
+      },
+      "TransactionSummaryOut": {
+        "properties": {
+          "mcc_code": {
+            "type": "string",
+            "title": "Mcc Code"
+          },
+          "city": {
+            "type": "string",
+            "title": "City"
+          },
+          "year": {
+            "type": "integer",
+            "title": "Year"
+          },
+          "annual_total_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Annual Total Uzs"
+          },
+          "monthly_breakdown": {
+            "items": {
+              "$ref": "#/components/schemas/TransactionMonthOut"
+            },
+            "type": "array",
+            "title": "Monthly Breakdown"
+          },
+          "months_with_data": {
+            "type": "integer",
+            "title": "Months With Data"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mcc_code",
+          "city",
+          "year",
+          "annual_total_uzs",
+          "monthly_breakdown",
+          "months_with_data"
+        ],
+        "title": "TransactionSummaryOut"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
