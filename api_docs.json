@@ -132,6 +132,48 @@
         }
       }
     },
+    "/api/v1/models/churn-prediction": {
+      "post": {
+        "tags": [
+          "M-E2: Churn Prediction"
+        ],
+        "summary": "M-E2 - Biznes yopilish ehtimolini bashorat qilish",
+        "description": "SMB biznesining birinchi 2 yil ichida yopilish ehtimolini hisoblaydi va top-3 risk faktorini qaytaradi.",
+        "operationId": "churn_prediction_api_v1_models_churn_prediction_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChurnPredictionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChurnPredictionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/data/niches": {
       "get": {
         "tags": [
@@ -1053,6 +1095,638 @@
         ],
         "title": "BenchmarkOut"
       },
+      "ChurnPredictionRequest": {
+        "properties": {
+          "business_id": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Business Id",
+            "description": "Mavjud biznes IDsi. Berilsa biznes DBdan olinadi."
+          },
+          "mcc_code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 4,
+                "minLength": 4
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mcc Code",
+            "description": "MCC kod. business_id berilmasa majburiy."
+          },
+          "niche": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Niche",
+            "description": "Biznes nishasi. Berilmasa MCC yoki business orqali aniqlanadi."
+          },
+          "city": {
+            "type": "string",
+            "title": "City",
+            "description": "Shahar nomi",
+            "default": "Toshkent"
+          },
+          "district": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "District",
+            "description": "Tuman nomi"
+          },
+          "lat": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 90,
+                "minimum": -90
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lat"
+          },
+          "lon": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 180,
+                "minimum": -180
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lon"
+          },
+          "radius_m": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 20000,
+                "minimum": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Radius M",
+            "default": 1000
+          },
+          "as_of_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "As Of Date",
+            "description": "Scoring sanasi. Berilmasa bugungi sana ishlatiladi."
+          },
+          "prediction_horizon_months": {
+            "type": "integer",
+            "maximum": 36,
+            "minimum": 6,
+            "title": "Prediction Horizon Months",
+            "description": "Yopilish ehtimoli gorizonti. M-E2 uchun odatda 24 oy.",
+            "default": 24
+          },
+          "business_age_months": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 600,
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Business Age Months"
+          },
+          "employee_count_est": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 500,
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Employee Count Est"
+          },
+          "area_sqm": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100000,
+                "minimum": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Area Sqm"
+          },
+          "revenue_3m_avg_uzs": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revenue 3M Avg Uzs"
+          },
+          "revenue_6m_avg_uzs": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revenue 6M Avg Uzs"
+          },
+          "revenue_12m_avg_uzs": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revenue 12M Avg Uzs"
+          },
+          "revenue_trend_6m_pct": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 2,
+                "minimum": -1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revenue Trend 6M Pct"
+          },
+          "revenue_volatility_12m_pct": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 3,
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revenue Volatility 12M Pct"
+          },
+          "revenue_drop_last_3m_pct": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1,
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revenue Drop Last 3M Pct"
+          },
+          "zero_revenue_months_12m": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 12,
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zero Revenue Months 12M"
+          },
+          "tx_count_3m_avg": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tx Count 3M Avg"
+          },
+          "tx_count_12m_avg": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tx Count 12M Avg"
+          },
+          "tx_count_trend_6m_pct": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 2,
+                "minimum": -1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tx Count Trend 6M Pct"
+          },
+          "avg_ticket_3m_uzs": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Ticket 3M Uzs"
+          },
+          "avg_ticket_change_6m_pct": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 2,
+                "minimum": -1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Ticket Change 6M Pct"
+          },
+          "active_days_last_90d": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 90,
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Active Days Last 90D"
+          },
+          "inactive_days_last_90d": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 90,
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Inactive Days Last 90D"
+          },
+          "online_share_12m_pct": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1,
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Online Share 12M Pct"
+          },
+          "competitor_count_radius": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 10000,
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Competitor Count Radius"
+          },
+          "competitor_density_score": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1,
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Competitor Density Score"
+          },
+          "nearby_closed_businesses_24m": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 10000,
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nearby Closed Businesses 24M"
+          },
+          "district_failure_rate_24m_pct": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1,
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "District Failure Rate 24M Pct"
+          },
+          "macro_risk_score": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1,
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Macro Risk Score"
+          },
+          "seasonality_risk_score": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1,
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seasonality Risk Score"
+          },
+          "data_quality_score": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1,
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Quality Score"
+          }
+        },
+        "type": "object",
+        "title": "ChurnPredictionRequest",
+        "description": "M-E2 SMB Churn Prediction request."
+      },
+      "ChurnPredictionResponse": {
+        "properties": {
+          "run_id": {
+            "type": "integer",
+            "title": "Run Id"
+          },
+          "feature_snapshot_id": {
+            "type": "integer",
+            "title": "Feature Snapshot Id"
+          },
+          "model_version_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Version Id"
+          },
+          "business_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Business Id"
+          },
+          "niche": {
+            "type": "string",
+            "title": "Niche"
+          },
+          "mcc_code": {
+            "type": "string",
+            "title": "Mcc Code"
+          },
+          "city": {
+            "type": "string",
+            "title": "City"
+          },
+          "as_of_date": {
+            "type": "string",
+            "format": "date",
+            "title": "As Of Date"
+          },
+          "prediction_horizon_months": {
+            "type": "integer",
+            "title": "Prediction Horizon Months"
+          },
+          "closure_probability_24m": {
+            "type": "number",
+            "title": "Closure Probability 24M"
+          },
+          "survival_probability_24m": {
+            "type": "number",
+            "title": "Survival Probability 24M"
+          },
+          "risk_bucket": {
+            "type": "string",
+            "title": "Risk Bucket"
+          },
+          "risk_score": {
+            "type": "number",
+            "title": "Risk Score"
+          },
+          "confidence_score": {
+            "type": "number",
+            "title": "Confidence Score"
+          },
+          "top_factors": {
+            "items": {
+              "$ref": "#/components/schemas/ChurnRiskFactorOut"
+            },
+            "type": "array",
+            "title": "Top Factors"
+          },
+          "prediction_summary": {
+            "type": "string",
+            "title": "Prediction Summary"
+          },
+          "methodology_notes": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Methodology Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "run_id",
+          "feature_snapshot_id",
+          "model_version_id",
+          "business_id",
+          "niche",
+          "mcc_code",
+          "city",
+          "as_of_date",
+          "prediction_horizon_months",
+          "closure_probability_24m",
+          "survival_probability_24m",
+          "risk_bucket",
+          "risk_score",
+          "confidence_score",
+          "top_factors",
+          "prediction_summary",
+          "methodology_notes"
+        ],
+        "title": "ChurnPredictionResponse"
+      },
+      "ChurnRiskFactorOut": {
+        "properties": {
+          "rank": {
+            "type": "integer",
+            "title": "Rank"
+          },
+          "factor_name": {
+            "type": "string",
+            "title": "Factor Name"
+          },
+          "factor_group": {
+            "type": "string",
+            "title": "Factor Group"
+          },
+          "factor_value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Factor Value"
+          },
+          "baseline_value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Baseline Value"
+          },
+          "impact_score": {
+            "type": "number",
+            "title": "Impact Score"
+          },
+          "direction": {
+            "type": "string",
+            "title": "Direction"
+          },
+          "explanation": {
+            "type": "string",
+            "title": "Explanation"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rank",
+          "factor_name",
+          "factor_group",
+          "impact_score",
+          "direction",
+          "explanation"
+        ],
+        "title": "ChurnRiskFactorOut"
+      },
       "CompetitorListOut": {
         "properties": {
           "mcc_code": {
@@ -1403,18 +2077,6 @@
       },
       "DemandForecastRequest": {
         "properties": {
-          "niche": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Niche",
-            "description": "Biznes nishasi. Berilmasa, backend mcc_code orqali mcc_categories jadvalidan topadi."
-          },
           "mcc_code": {
             "type": "string",
             "maxLength": 4,
@@ -1475,68 +2137,6 @@
             "title": "Horizon Months",
             "description": "Prognoz gorizonti: 12, 24 yoki 36 oy",
             "default": 12
-          },
-          "confidence_level": {
-            "type": "number",
-            "maximum": 0.99,
-            "minimum": 0.8,
-            "title": "Confidence Level",
-            "description": "Ishonch intervali darajasi",
-            "default": 0.95
-          },
-          "start_month": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Start Month",
-            "description": "Tarixiy qator boshlanish oyi (YYYY-MM-01)"
-          },
-          "end_month": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "End Month",
-            "description": "Tarixiy qator tugash oyi (YYYY-MM-01)"
-          },
-          "annual_inflation_rate_pct": {
-            "type": "number",
-            "maximum": 1,
-            "minimum": -0.2,
-            "title": "Annual Inflation Rate Pct",
-            "description": "Yillik inflatsiya taxmini, masalan 0.12 = 12%",
-            "default": 0.12
-          },
-          "annual_macro_growth_pct": {
-            "type": "number",
-            "maximum": 0.5,
-            "minimum": -0.5,
-            "title": "Annual Macro Growth Pct",
-            "description": "Makro talab/iqtisodiy o'sish taxmini, masalan 0.03 = 3%",
-            "default": 0.03
-          },
-          "use_holiday_adjustments": {
-            "type": "boolean",
-            "title": "Use Holiday Adjustments",
-            "description": "Bayram va mavsumiy event flaglarini forecastga qo'shish",
-            "default": true
-          },
-          "clean_anomalies": {
-            "type": "boolean",
-            "title": "Clean Anomalies",
-            "description": "Tarixiy revenue qatoridagi keskin anomal oylarni winsorize qilish",
-            "default": true
           }
         },
         "type": "object",
