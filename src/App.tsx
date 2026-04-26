@@ -5,6 +5,7 @@ import { MarketSizingPage } from './pages/MarketSizingPage';
 import { DemandForecastPage } from './pages/DemandForecastPage';
 import { ViabilityCheckPage } from './pages/ViabilityCheckPage';
 import { ChurnPredictionPage } from './pages/ChurnPredictionPage';
+import { OrchestratorPage } from './pages/OrchestratorPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 
 function App() {
@@ -12,6 +13,7 @@ function App() {
     <Routes>
       <Route path="/" element={<AppLayout />}>
         <Route index element={<DashboardPage />} />
+        <Route path="orchestrator" element={<OrchestratorPage />} />
         <Route path="market-sizing" element={<MarketSizingPage />} />
         <Route path="demand-forecast" element={<DemandForecastPage />} />
         <Route path="viability-check" element={<ViabilityCheckPage />} />

@@ -7,7 +7,7 @@ import {
   Target, BarChart2, MapPin, 
   CheckCircle, Users, Activity, 
   TrendingUp, ArrowRight, Zap,
-  AlertTriangle,
+  AlertTriangle, Sparkles,
 } from 'lucide-react';
 import styles from './DashboardPage.module.css';
 
@@ -15,6 +15,7 @@ export const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
 
   const blocks = [
+    { id: 'AI', title: 'Full AI Analysis', icon: <Sparkles className={styles.iconA} />, desc: '7 blok × 35 modul — orkestrator', path: '/orchestrator' },
     { id: 'A', title: 'Market Sizing', icon: <Target className={styles.iconA} />, desc: 'TAM, SAM, SOM tahlili', path: '/market-sizing' },
     { id: 'B', title: 'Demand Forecast', icon: <TrendingUp className={styles.iconB} />, desc: 'Talabni bashorat qilish', path: '/demand-forecast' },
     { id: 'C', title: 'Location Score', icon: <MapPin className={styles.iconC} />, desc: 'Joylashuv indeksi', status: 'Tez kunda' },
@@ -34,16 +35,27 @@ export const DashboardPage: React.FC = () => {
           </Badge>
           <h1 className={styles.title}>KMB AI Analitik Platformasi</h1>
           <p className={styles.subtitle}>
-            Sun'iy intellekt yordamida biznesingiz uchun ma'lumotlarga asoslangan qarorlar qabul qiling. Boshlash uchun o'zingizga kerakli modulni tanlang.
+            Sun'iy intellekt yordamida biznesingiz uchun ma'lumotlarga asoslangan qarorlar qabul qiling. Bitta formadan — 7 blok va 35 modul bo'yicha umumiy tahlil oling.
           </p>
-          <Button 
-            variant="primary" 
-            size="lg" 
-            onClick={() => navigate('/market-sizing')}
-            style={{ width: 'fit-content' }}
-          >
-            Bozor Hajmini Hisoblash (M-A1) <ArrowRight size={18} style={{ marginLeft: '8px' }} />
-          </Button>
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <Button
+              variant="primary"
+              size="lg"
+              onClick={() => navigate('/orchestrator')}
+              icon={<Sparkles size={18} />}
+              style={{ width: 'fit-content' }}
+            >
+              To'liq AI Tahlil (35 modul) <ArrowRight size={18} style={{ marginLeft: '8px' }} />
+            </Button>
+            <Button
+              variant="secondary"
+              size="lg"
+              onClick={() => navigate('/market-sizing')}
+              style={{ width: 'fit-content' }}
+            >
+              Bozor Hajmini Hisoblash (M-A1)
+            </Button>
+          </div>
         </div>
       </section>
 

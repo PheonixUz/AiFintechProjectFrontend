@@ -9,6 +9,7 @@ import {
   TrendingUp,
   Wallet,
   AlertTriangle,
+  Sparkles,
 } from 'lucide-react';
 import styles from './Sidebar.module.css';
 
@@ -20,6 +21,7 @@ export const Sidebar: React.FC = () => {
 
   const navItems = [
     { path: '/', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
+    { path: '/orchestrator', label: 'Full AI Analysis', icon: <Sparkles size={20} /> },
     { path: '/market-sizing', label: 'Market Sizing', icon: <Target size={20} /> },
     { path: '/demand-forecast', label: 'Demand Forecast', icon: <TrendingUp size={20} /> },
     { path: '/viability-check', label: 'Financial Viability', icon: <Wallet size={20} /> },
