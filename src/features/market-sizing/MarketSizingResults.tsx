@@ -7,6 +7,56 @@ import {
   Percent, DollarSign, Activity, TrendingUp, Info,
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import type { MarketSizingResponse, MethodologyNotes } from '../../types/api.types';
+
+// ─── API field notes (faqat tooltipda) ─────────────────────────────────────
+const rootFieldNote = (result: MarketSizingResponse, fieldKey: string): string | undefined => {
+  const v = (result as unknown as Record<string, unknown>)[`${fieldKey}_note`];
+  return typeof v === 'string' && v.trim() ? v : undefined;
+};
+
+const methodologyFieldNote = (notes: MethodologyNotes | undefined, baseKey: string): string | undefined => {
+  const v = notes?.[`${baseKey}_note`];
+  return typeof v === 'string' && v.trim() ? v : undefined;
+};
+
+const mergeNotes = (...parts: (string | undefined | null | false)[]): string =>
+  parts.filter((p): p is string => typeof p === 'string' && Boolean(p.trim())).join('\n\n');
+
+// ─── Metodologiya: har qatorda 2 ta teng ustun ────────────────────────────────
+const methodologyRow: React.CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',
+  gap: '16px',
+  alignItems: 'stretch',
+};
+
+const methodologyCell: React.CSSProperties = {
+  padding: '14px 16px',
+  borderRadius: '8px',
+  border: '1px solid var(--border)',
+  backgroundColor: 'var(--bg-secondary)',
+  minHeight: '88px',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '10px',
+  justifyContent: 'flex-start',
+};
+
+const methodologyLabel: React.CSSProperties = {
+  fontSize: '0.8rem',
+  color: 'var(--text-muted)',
+  lineHeight: 1.35,
+};
+
+const methodologyValueRow: React.CSSProperties = {
+  fontWeight: 600,
+  fontSize: '1rem',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '6px',
+  flexWrap: 'wrap',
+};
 
 // ─── Utility: safe parse number from string or number ───────────────────────
 const parseNum = (value: string | number | undefined | null): number => {
@@ -176,18 +226,21 @@ export const MarketSizingResults: React.FC = () => {
               }}
             />
           </div>
-          <Note text={getConfidenceNote(result.confidence_score)} />
+          <Note text={mergeNotes(rootFieldNote(result, 'confidence_score'), getConfidenceNote(result.confidence_score))} />
         </div>
       </div>
 
       {/* ── TAM / SAM / SOM Funnel ── */}
-      <Card padding="lg" className="glass-panel">
+      <Card padding="lg" className="glass-panel" overflowVisible>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
-          <div style={{ width: '100%', display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '4px' }}>
+          <div style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', flexWrap: 'wrap' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Bozor Hajmi (Funnel)</h3>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-              Qavs ichidagi raqamlar ±30% ishonch oralig'i
-            </span>
+            <Note text={mergeNotes(
+              rootFieldNote(result, 'tam_uzs'),
+              rootFieldNote(result, 'sam_uzs'),
+              rootFieldNote(result, 'som_uzs'),
+              "Qavs ichidagi raqamlar taxminan ±30% ishonch oralig'ini bildiradi"
+            )} />
           </div>
 
           {/* TAM — butun shahar bo'yicha yillik bozor aylanmasi */}
@@ -204,9 +257,14 @@ export const MarketSizingResults: React.FC = () => {
             gap: '8px',
           }}>
             <div>
-              <div style={{ fontWeight: 600, fontSize: '1.1rem', color: '#60a5fa' }}>TAM — Umumiy bozor</div>
-              <Note text={`Butun ${result.city} bo'yicha MCC ${result.mcc_code} bizneslarining yillik aylanmasi`} />
-              <Note text="Hisob: bank tranzaksiyalari × w + benchmark × (1−w)" />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                <div style={{ fontWeight: 600, fontSize: '1.1rem', color: '#60a5fa' }}>TAM — Umumiy bozor</div>
+                <Note text={mergeNotes(
+                  rootFieldNote(result, 'tam_uzs'),
+                  `Butun ${result.city} bo'yicha MCC ${result.mcc_code} bizneslarining yillik aylanmasi`,
+                  'Hisob: bank tranzaksiyalari × w + benchmark × (1−w)'
+                )} />
+              </div>
             </div>
             <div style={{ textAlign: 'right' }}>
               <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#60a5fa' }}>
@@ -232,9 +290,14 @@ export const MarketSizingResults: React.FC = () => {
             gap: '8px',
           }}>
             <div>
-              <div style={{ fontWeight: 600, fontSize: '1.1rem', color: '#a78bfa' }}>SAM — Qamrab olish mumkin</div>
-              <Note text="Faqat tanlangan radius ichidagi raqobatchilarning yillik aylanmasi" />
-              <Note text={`"Atrofimda shu nishada qancha pul aylanmoqda?"`} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                <div style={{ fontWeight: 600, fontSize: '1.1rem', color: '#a78bfa' }}>SAM — Qamrab olish mumkin</div>
+                <Note text={mergeNotes(
+                  rootFieldNote(result, 'sam_uzs'),
+                  "Faqat tanlangan radius ichidagi raqobatchilarning yillik aylanmasi",
+                  '"Atrofimda shu nishada qancha pul aylanmoqda?"'
+                )} />
+              </div>
             </div>
             <div style={{ textAlign: 'right' }}>
               <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#a78bfa' }}>
@@ -260,9 +323,14 @@ export const MarketSizingResults: React.FC = () => {
             gap: '8px',
           }}>
             <div>
-              <div style={{ fontWeight: 600, fontSize: '1.1rem', color: '#34d399' }}>SOM — Haqiqiy ulush</div>
-              <Note text="Hisob: SAM × 1/(raqobatchilar+1) × sifat_koeffitsiyenti" />
-              <Note text="Eng muhim raqam — kapitalingiz bilan solishtiring" />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                <div style={{ fontWeight: 600, fontSize: '1.1rem', color: '#34d399' }}>SOM — Haqiqiy ulush</div>
+                <Note text={mergeNotes(
+                  rootFieldNote(result, 'som_uzs'),
+                  "Hisob: SAM × 1/(raqobatchilar+1) × sifat_koeffitsiyenti",
+                  'Eng muhim raqam — kapitalingiz bilan solishtiring'
+                )} />
+              </div>
             </div>
             <div style={{ textAlign: 'right' }}>
               <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#34d399' }}>
@@ -280,13 +348,17 @@ export const MarketSizingResults: React.FC = () => {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '16px' }}>
 
         {/* market_share_pct — 1/(raqobatchilar+1) × 100 */}
-        <Card padding="md" className="glass-panel">
+        <Card padding="md" className="glass-panel" overflowVisible>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', marginBottom: '8px' }}>
             <Percent size={16} />
             <span style={{ fontSize: '0.9rem' }}>Bozor ulushi</span>
           </div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '8px' }}>
+          <div style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
             {formatPct(marketSharePct)}%
+            <Note text={mergeNotes(
+              rootFieldNote(result, 'market_share_pct'),
+              `Hisob: 1 / (${result.competitor_count_radius} + 1) × 100 — teng bo'linish ssenariysi`
+            )} />
           </div>
           <div style={{ width: '100%', height: '6px', backgroundColor: 'var(--bg-secondary)', borderRadius: '3px', overflow: 'hidden', marginBottom: '4px' }}>
             <div style={{
@@ -296,11 +368,10 @@ export const MarketSizingResults: React.FC = () => {
               transition: 'width 1s ease-in-out',
             }} />
           </div>
-          <Note text={`Hisob: 1 / (${result.competitor_count_radius} + 1) × 100 — teng bo'linish ssenariysi`} />
         </Card>
 
         {/* market_growth_rate_pct — benchmarkdan, 0-1 → ×100 */}
-        <Card padding="md" className="glass-panel">
+        <Card padding="md" className="glass-panel" overflowVisible>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', marginBottom: '8px' }}>
             <Activity size={16} />
             <span style={{ fontSize: '0.9rem' }}>O'sish sur'ati</span>
@@ -309,51 +380,66 @@ export const MarketSizingResults: React.FC = () => {
             fontSize: '1.5rem',
             fontWeight: 600,
             color: growthRate >= 0 ? 'var(--success)' : 'var(--error)',
+            display: 'flex',
+            alignItems: 'baseline',
+            gap: '6px',
+            flexWrap: 'wrap',
           }}>
-            {growthRate > 0 ? '+' : ''}{formatPct(growthRate)}%
-            <span style={{ fontSize: '0.8rem', fontWeight: 400, color: 'var(--text-muted)', marginLeft: '4px' }}>/yil</span>
+            <span>
+              {growthRate > 0 ? '+' : ''}{formatPct(growthRate)}%
+              <span style={{ fontSize: '0.8rem', fontWeight: 400, color: 'var(--text-muted)', marginLeft: '4px' }}>/yil</span>
+            </span>
+            <Note text={mergeNotes(
+              rootFieldNote(result, 'market_growth_rate_pct'),
+              "DB benchmark ma'lumotidan — nisha kengaymoqdami yoki qisqarmoqda?"
+            )} />
           </div>
-          <Note text="DB benchmark ma'lumotidan — nisha kengaymoqdami yoki qisqarmoqda?" />
         </Card>
 
         {/* gross_margin_pct — benchmarkdan, 0-1 → ×100 */}
-        <Card padding="md" className="glass-panel">
+        <Card padding="md" className="glass-panel" overflowVisible>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', marginBottom: '8px' }}>
             <DollarSign size={16} />
             <span style={{ fontSize: '0.9rem' }}>Brutto marja</span>
           </div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 600 }}>
+          <div style={{ fontSize: '1.5rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
             {formatPct(grossMargin)}%
+            <Note text={mergeNotes(
+              rootFieldNote(result, 'gross_margin_pct'),
+              "DB benchmark ma'lumotidan — daromadning xarajatlar chegirilib qoladigan foizi",
+              'ROI va rentabellik modellarida asosiy kirish'
+            )} />
           </div>
-          <Note text="DB benchmark ma'lumotidan — daromadning xarajatlar chegirilib qoladigan foizi" />
-          <Note text="ROI va rentabellik modellarida asosiy kirish" />
         </Card>
 
         {/* competitor_count_radius — market_share_pct ni belgilaydi */}
-        <Card padding="md" className="glass-panel">
+        <Card padding="md" className="glass-panel" overflowVisible>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', marginBottom: '8px' }}>
             <MapPin size={16} />
             <span style={{ fontSize: '0.9rem' }}>Raqobatchilar</span>
           </div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 600 }}>
+          <div style={{ fontSize: '1.5rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
             {result.competitor_count_radius ?? 0} ta
+            <Note text={mergeNotes(
+              rootFieldNote(result, 'competitor_count_radius'),
+              'Tanlangan radius ichida topilgan shu MCC kodli bizneslar soni',
+              "Bu raqam bozor ulushini (SOM) to'g'ridan-to'g'ri belgilaydi"
+            )} />
           </div>
-          <Note text="Tanlangan radius ichida topilgan shu MCC kodli bizneslar soni" />
-          <Note text="Bu raqam bozor ulushini (SOM) to'g'ridan-to'g'ri belgilaydi" />
         </Card>
 
       </div>
 
       {/* ── Tahlil (analysis_summary) ── */}
-      <Card padding="lg" className="glass-panel">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+      <Card padding="lg" className="glass-panel" overflowVisible>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', flexWrap: 'wrap' }}>
           <AlertCircle size={20} color="var(--accent-primary)" />
           <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>AI Tahlili</h3>
+          <Note text={mergeNotes(
+            result.analysis_summary_note,
+            'Gemini AI tomonidan avtomatik tayyorlangan — SOM va kapital nisbati, nisha perspektivi, asosiy xavflar'
+          )} />
         </div>
-        {/* analysis_summary — Gemini tomonidan o'zbek tilida yozilgan 3-5 gap */}
-        <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '12px' }}>
-          Gemini AI tomonidan avtomatik tayyorlangan — SOM va kapital nisbati, nisha perspektivi, asosiy xavflar
-        </p>
         <div style={{ color: 'var(--text-secondary)', lineHeight: 1.7, fontSize: '0.95rem' }}>
           {result.analysis_summary ? (
             <ReactMarkdown>{result.analysis_summary}</ReactMarkdown>
@@ -364,115 +450,134 @@ export const MarketSizingResults: React.FC = () => {
       </Card>
 
       {/* ── Metodologiya (methodology_notes) ── */}
-      <Card padding="md" className="glass-panel">
+      <Card padding="md" className="glass-panel" overflowVisible>
         <div style={{ cursor: 'pointer' }} onClick={() => setMethodologyOpen(!methodologyOpen)}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               <TrendingUp size={18} color="var(--text-muted)" />
               <h3 style={{ fontSize: '1rem', fontWeight: 500 }}>Metodologiya ma'lumotlari</h3>
+              <span onClick={(e) => e.stopPropagation()} style={{ display: 'inline-flex' }}>
+                <Note text={mergeNotes(
+                  methodologyFieldNote(result.methodology_notes, 'methodology'),
+                  "Bayesian birlashtirish og'irliklari, bottom-up / top-down TAM va SAM bo'yicha qisqa ma'lumot"
+                )} />
+              </span>
             </div>
             {methodologyOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
           </div>
-          {!methodologyOpen && (
-            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-              Bayesian birlashtirish og'irliklari, bottom-up / top-down TAM & SAM, hisob formulasi
-            </p>
-          )}
         </div>
 
         {methodologyOpen && (
           <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--border)' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px' }}>
-
-              {/* data_weight — bank tranzaksiya ma'lumotiga berilgan Bayesian og'irlik */}
-              <div>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                  Umumiy Bayesian og'irlik (data_weight):
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {/* Qator 1: Bayesian og'irliklari (2 teng ustun) */}
+              <div style={methodologyRow}>
+                <div style={methodologyCell}>
+                  <div style={methodologyLabel}>Umumiy Bayesian og'irlik (data_weight)</div>
+                  <div style={methodologyValueRow}>
+                    {dataWeightPct}%
+                    <Note text={mergeNotes(
+                      methodologyFieldNote(result.methodology_notes, 'data_weight'),
+                      rootFieldNote(result, 'data_weight'),
+                      `${dataWeightPct}% bank ma'lumotiga, ${100 - dataWeightPct}% benchmarkga`,
+                      dataWeightPct >= 70
+                        ? 'Hisob asosan haqiqiy bank tranzaksiyalariga asoslangan'
+                        : "DB da kam tranzaksiya — hisob ko'proq benchmarkka tayanmoqda"
+                    )} />
+                  </div>
                 </div>
-                <div style={{ fontWeight: 500 }}>
-                  {dataWeightPct}%
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginLeft: '6px' }}>
-                    bank ma'lumotiga | {100 - dataWeightPct}% benchmarkga
-                  </span>
+                <div style={methodologyCell}>
+                  <div style={methodologyLabel}>Top-down ulushi (bank tranzaksiyalari)</div>
+                  <div style={methodologyValueRow}>
+                    {bayesianTopDownPct !== null ? (
+                      <>
+                        {bayesianTopDownPct}%
+                        <Note text={mergeNotes(
+                          methodologyFieldNote(result.methodology_notes, 'bayesian_weight_top_down'),
+                          `Top-down (bank): ${bayesianTopDownPct}%, Bottom-up (benchmark): ${100 - bayesianTopDownPct}%`,
+                          "data_weight ning metodologiyadagi izoh ko'rinishi"
+                        )} />
+                      </>
+                    ) : (
+                      <span style={{ color: 'var(--text-muted)', fontWeight: 500 }}>—</span>
+                    )}
+                  </div>
                 </div>
-                <Note text={
-                  dataWeightPct >= 70
-                    ? 'Hisob asosan haqiqiy bank tranzaksiyalariga asoslangan'
-                    : 'DB da kam tranzaksiya — hisob ko\'proq benchmarkka tayanmoqda'
-                } />
               </div>
 
-              {/* bayesian_weight_top_down — top-down (bank) ulushi, data_weight ning izoh nusxasi */}
-              {bayesianTopDownPct !== null && (
-                <div>
-                  <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                    Top-down ulushi (bank tranzaksiyalari):
+              {/* Qator 2: TAM bottom-up | TAM top-down */}
+              {(result.methodology_notes?.tam_bottom_up_uzs || result.methodology_notes?.tam_top_down_uzs) && (
+                <div style={methodologyRow}>
+                  <div style={methodologyCell}>
+                    <div style={methodologyLabel}>TAM — Bottom-up (benchmark)</div>
+                    <div style={methodologyValueRow}>
+                      {result.methodology_notes?.tam_bottom_up_uzs ? (
+                        <>
+                          {formatCurrency(result.methodology_notes.tam_bottom_up_uzs)}
+                          <Note text={mergeNotes(
+                            methodologyFieldNote(result.methodology_notes, 'tam_bottom_up_uzs'),
+                            "Raqobatchilar soni × o'rtacha benchmark daromadi × 12 oy"
+                          )} />
+                        </>
+                      ) : (
+                        <span style={{ color: 'var(--text-muted)', fontWeight: 500 }}>—</span>
+                      )}
+                    </div>
                   </div>
-                  <div style={{ fontWeight: 500 }}>
-                    {bayesianTopDownPct}%
-                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginLeft: '6px' }}>
-                      | Bottom-up (benchmark): {100 - bayesianTopDownPct}%
-                    </span>
+                  <div style={methodologyCell}>
+                    <div style={methodologyLabel}>TAM — Top-down (bank tranzaksiyalari)</div>
+                    <div style={methodologyValueRow}>
+                      {result.methodology_notes?.tam_top_down_uzs ? (
+                        <>
+                          {formatCurrency(result.methodology_notes.tam_top_down_uzs)}
+                          <Note text={mergeNotes(
+                            methodologyFieldNote(result.methodology_notes, 'tam_top_down_uzs'),
+                            "Haqiqiy bank to'lov ma'lumotlaridan olingan yillik aylanma"
+                          )} />
+                        </>
+                      ) : (
+                        <span style={{ color: 'var(--text-muted)', fontWeight: 500 }}>—</span>
+                      )}
+                    </div>
                   </div>
-                  <Note text="data_weight ning metodologiyadagi izoh ko'rinishi" />
                 </div>
               )}
 
-              {/* tam_bottom_up_uzs — benchmark usuli bilan hisoblangan TAM */}
-              {result.methodology_notes?.tam_bottom_up_uzs && (
-                <div>
-                  <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>TAM — Bottom-up (benchmark):</div>
-                  <div style={{ fontWeight: 500 }}>{formatCurrency(result.methodology_notes.tam_bottom_up_uzs)}</div>
-                  <Note text="Raqobatchilar soni × o'rtacha benchmark daromadi × 12 oy" />
-                </div>
-              )}
-
-              {/* tam_top_down_uzs — bank tranzaksiyalaridan olingan TAM */}
-              {result.methodology_notes?.tam_top_down_uzs && (
-                <div>
-                  <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>TAM — Top-down (bank tranzaksiyalari):</div>
-                  <div style={{ fontWeight: 500 }}>{formatCurrency(result.methodology_notes.tam_top_down_uzs)}</div>
-                  <Note text="Haqiqiy bank to'lov ma'lumotlaridan olingan yillik aylanma" />
-                </div>
-              )}
-
-              {/* sam_bottom_up_uzs — benchmark usuli bilan hisoblangan SAM */}
-              {result.methodology_notes?.sam_bottom_up_uzs && (
-                <div>
-                  <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>SAM — Bottom-up (benchmark):</div>
-                  <div style={{ fontWeight: 500 }}>{formatCurrency(result.methodology_notes.sam_bottom_up_uzs)}</div>
-                  <Note text="Radius ichidagi raqobatchilar × benchmark daromadi × 12 oy" />
-                </div>
-              )}
-
-              {/* sam_top_down_uzs — bank tranzaksiyalaridan olingan SAM */}
-              {result.methodology_notes?.sam_top_down_uzs && (
-                <div>
-                  <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>SAM — Top-down (bank tranzaksiyalari):</div>
-                  <div style={{ fontWeight: 500 }}>{formatCurrency(result.methodology_notes.sam_top_down_uzs)}</div>
-                  <Note text="Radius ichidagi bank to'lovlaridan olingan yillik aylanma" />
-                </div>
-              )}
-
-              {/* market_share_formula — qanday hisoblangani aniq formulada */}
-              {result.methodology_notes?.market_share_formula && (
-                <div style={{ gridColumn: '1 / -1' }}>
-                  <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                    Bozor ulushi formulasi (SOM hisob asosi):
+              {/* Qator 3: SAM bottom-up | SAM top-down */}
+              {(result.methodology_notes?.sam_bottom_up_uzs || result.methodology_notes?.sam_top_down_uzs) && (
+                <div style={methodologyRow}>
+                  <div style={methodologyCell}>
+                    <div style={methodologyLabel}>SAM — Bottom-up (benchmark)</div>
+                    <div style={methodologyValueRow}>
+                      {result.methodology_notes?.sam_bottom_up_uzs ? (
+                        <>
+                          {formatCurrency(result.methodology_notes.sam_bottom_up_uzs)}
+                          <Note text={mergeNotes(
+                            methodologyFieldNote(result.methodology_notes, 'sam_bottom_up_uzs'),
+                            'Radius ichidagi raqobatchilar × benchmark daromadi × 12 oy'
+                          )} />
+                        </>
+                      ) : (
+                        <span style={{ color: 'var(--text-muted)', fontWeight: 500 }}>—</span>
+                      )}
+                    </div>
                   </div>
-                  <div style={{
-                    fontWeight: 500,
-                    fontSize: '0.95rem',
-                    fontFamily: 'monospace',
-                    backgroundColor: 'var(--bg-secondary)',
-                    padding: '10px 14px',
-                    borderRadius: '6px',
-                    marginTop: '6px',
-                    border: '1px solid var(--border)',
-                  }}>
-                    {result.methodology_notes.market_share_formula}
+                  <div style={methodologyCell}>
+                    <div style={methodologyLabel}>SAM — Top-down (bank tranzaksiyalari)</div>
+                    <div style={methodologyValueRow}>
+                      {result.methodology_notes?.sam_top_down_uzs ? (
+                        <>
+                          {formatCurrency(result.methodology_notes.sam_top_down_uzs)}
+                          <Note text={mergeNotes(
+                            methodologyFieldNote(result.methodology_notes, 'sam_top_down_uzs'),
+                            "Radius ichidagi bank to'lovlaridan olingan yillik aylanma"
+                          )} />
+                        </>
+                      ) : (
+                        <span style={{ color: 'var(--text-muted)', fontWeight: 500 }}>—</span>
+                      )}
+                    </div>
                   </div>
-                  <Note text="1 / (radius_ichida_raqobatchilar + 1) × sifat_koeffitsiyenti — teng bo'linish asosida hisoblangan ulush" />
                 </div>
               )}
             </div>
@@ -484,16 +589,17 @@ export const MarketSizingResults: React.FC = () => {
               fontSize: '0.78rem',
               color: 'var(--text-muted)',
               display: 'flex',
-              gap: '16px',
-              flexWrap: 'wrap',
+              alignItems: 'center',
+              gap: '8px',
             }}>
-              <span>📅 Hisob sanasi: <strong>{calcDate}</strong></span>
-              <span>⚠ Barcha qiymatlar ±30% ishonch oralig'iga ega</span>
-              {confidencePct < 40 && (
-                <span style={{ color: 'var(--error)' }}>
-                  ⚠ Ishonch darajasi past — natijalar taxminiy, ehtiyotkorlik tavsiya etiladi
-                </span>
-              )}
+              <Note text={mergeNotes(
+                methodologyFieldNote(result.methodology_notes, 'calculation_meta'),
+                `Hisob sanasi: ${calcDate}`,
+                "Barcha qiymatlar taxminan ±30% ishonch oralig'iga ega",
+                confidencePct < 40
+                  ? "Ishonch darajasi past — natijalar taxminiy, ehtiyotkorlik tavsiya etiladi"
+                  : undefined
+              )} />
             </div>
           </div>
         )}

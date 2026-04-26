@@ -12,18 +12,30 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-const MapEvents = () => {
-  const setLocation = useAnalysisStore((state) => state.setLocation);
+export type MapContainerOverrides = {
+  lat: number;
+  lon: number;
+  radius_m: number;
+  onLocationChange: (lat: number, lon: number) => void;
+};
+
+const MapEvents: React.FC<{ onLocationChange: (lat: number, lon: number) => void }> = ({
+  onLocationChange,
+}) => {
   useMapEvents({
     click(e) {
-      setLocation(e.latlng.lat, e.latlng.lng);
+      onLocationChange(e.latlng.lat, e.latlng.lng);
     },
   });
   return null;
 };
 
-export const MapContainer: React.FC = () => {
-  const { lat, lon, radius_m } = useAnalysisStore();
+export const MapContainer: React.FC<{ overrides?: MapContainerOverrides }> = ({ overrides }) => {
+  const analysis = useAnalysisStore();
+  const lat = overrides?.lat ?? analysis.lat;
+  const lon = overrides?.lon ?? analysis.lon;
+  const radius_m = overrides?.radius_m ?? analysis.radius_m;
+  const onLocationChange = overrides?.onLocationChange ?? analysis.setLocation;
 
   return (
     <div style={{ height: '100%', width: '100%', borderRadius: 'var(--radius-md)', overflow: 'hidden', position: 'relative', zIndex: 10 }}>
@@ -36,7 +48,7 @@ export const MapContainer: React.FC = () => {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
         />
-        <MapEvents />
+        <MapEvents onLocationChange={onLocationChange} />
         <Marker position={[lat, lon]} />
         <Circle 
           center={[lat, lon]} 

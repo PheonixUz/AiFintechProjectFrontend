@@ -17,6 +17,8 @@ export interface CardProps extends BaseProps {
   hoverEffect?: boolean;
   padding?: 'none' | 'sm' | 'md' | 'lg';
   onClick?: () => void;
+  /** Tooltips / absolute children can escape the card border without clipping */
+  overflowVisible?: boolean;
 }
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {

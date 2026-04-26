@@ -3,11 +3,11 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   BarChart3, 
-  Database, 
-  History, 
   Menu, 
   X,
-  Target
+  Target,
+  TrendingUp,
+  Wallet,
 } from 'lucide-react';
 import styles from './Sidebar.module.css';
 
@@ -20,8 +20,8 @@ export const Sidebar: React.FC = () => {
   const navItems = [
     { path: '/', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
     { path: '/market-sizing', label: 'Market Sizing', icon: <Target size={20} /> },
-    { path: '/data-explorer', label: 'Data Explorer', icon: <Database size={20} /> },
-    { path: '/history', label: 'History', icon: <History size={20} /> },
+    { path: '/demand-forecast', label: 'Demand Forecast', icon: <TrendingUp size={20} /> },
+    { path: '/viability-check', label: 'Financial Viability', icon: <Wallet size={20} /> },
   ];
 
   return (

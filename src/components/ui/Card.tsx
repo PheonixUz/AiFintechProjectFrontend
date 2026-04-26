@@ -8,16 +8,19 @@ export const Card: React.FC<CardProps> = ({
   hoverEffect = false,
   padding = 'md',
   onClick,
+  overflowVisible = false,
 }) => {
   const baseClasses = styles.card;
   const paddingClass = styles[`padding-${padding}`];
   const hoverClass = hoverEffect ? styles.hoverEffect : '';
+  const overflowClass = overflowVisible ? styles.overflowVisible : '';
   
   const combinedClasses = [
     'glass-panel', // Global glass class
     baseClasses,
     paddingClass,
     hoverClass,
+    overflowClass,
     className
   ].filter(Boolean).join(' ');
 

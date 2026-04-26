@@ -2,8 +2,8 @@ import { Routes, Route } from 'react-router-dom';
 import { AppLayout } from './components/layout/AppLayout';
 import { DashboardPage } from './pages/DashboardPage';
 import { MarketSizingPage } from './pages/MarketSizingPage';
-import { DataExplorerPage } from './pages/DataExplorerPage';
-import { HistoryPage } from './pages/HistoryPage';
+import { DemandForecastPage } from './pages/DemandForecastPage';
+import { ViabilityCheckPage } from './pages/ViabilityCheckPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 
 function App() {
@@ -12,8 +12,8 @@ function App() {
       <Route path="/" element={<AppLayout />}>
         <Route index element={<DashboardPage />} />
         <Route path="market-sizing" element={<MarketSizingPage />} />
-        <Route path="data-explorer" element={<DataExplorerPage />} />
-        <Route path="history" element={<HistoryPage />} />
+        <Route path="demand-forecast" element={<DemandForecastPage />} />
+        <Route path="viability-check" element={<ViabilityCheckPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>

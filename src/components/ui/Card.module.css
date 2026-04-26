@@ -4,6 +4,10 @@
   transition: transform var(--transition-normal), box-shadow var(--transition-normal);
 }
 
+.overflowVisible {
+  overflow: visible;
+}
+
 .padding-none { padding: 0; }
 .padding-sm { padding: 16px; }
 .padding-md { padding: 24px; }

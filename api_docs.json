@@ -90,6 +90,48 @@
         }
       }
     },
+    "/api/v1/models/viability-check": {
+      "post": {
+        "tags": [
+          "M-D1: Financial Viability"
+        ],
+        "summary": "M-D1 - Biznes-plan moliyaviy yashovchanligini tekshirish",
+        "description": "Biznes-plan uchun break-even, runway, 24 oylik survival probability va Monte Carlo cashflow risklarini hisoblaydi.",
+        "operationId": "viability_check_api_v1_models_viability_check_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ViabilityCheckRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ViabilityCheckResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/data/niches": {
       "get": {
         "tags": [
@@ -1325,6 +1367,24 @@
             ],
             "title": "Seasonal Component Uzs"
           },
+          "macro_adjustment_pct": {
+            "type": "number",
+            "title": "Macro Adjustment Pct",
+            "default": 0
+          },
+          "competitor_pressure_pct": {
+            "type": "number",
+            "title": "Competitor Pressure Pct",
+            "default": 0
+          },
+          "event_flags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Event Flags",
+            "default": []
+          },
           "confidence_level": {
             "type": "number",
             "title": "Confidence Level"
@@ -1344,9 +1404,16 @@
       "DemandForecastRequest": {
         "properties": {
           "niche": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Niche",
-            "description": "Biznes nishasi (masalan: 'Restoran')"
+            "description": "Biznes nishasi. Berilmasa, backend mcc_code orqali mcc_categories jadvalidan topadi."
           },
           "mcc_code": {
             "type": "string",
@@ -1360,6 +1427,48 @@
             "title": "City",
             "description": "Shahar nomi",
             "default": "Toshkent"
+          },
+          "lat": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 90,
+                "minimum": -90
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lat",
+            "description": "Ixtiyoriy lokatsiya latitude; local competitor pressure uchun"
+          },
+          "lon": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 180,
+                "minimum": -180
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lon",
+            "description": "Ixtiyoriy lokatsiya longitude; local competitor pressure uchun"
+          },
+          "radius_m": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 20000,
+                "minimum": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Radius M",
+            "description": "Ixtiyoriy lokatsiya radiusi; local competitor pressure uchun"
           },
           "horizon_months": {
             "type": "integer",
@@ -1400,11 +1509,38 @@
             ],
             "title": "End Month",
             "description": "Tarixiy qator tugash oyi (YYYY-MM-01)"
+          },
+          "annual_inflation_rate_pct": {
+            "type": "number",
+            "maximum": 1,
+            "minimum": -0.2,
+            "title": "Annual Inflation Rate Pct",
+            "description": "Yillik inflatsiya taxmini, masalan 0.12 = 12%",
+            "default": 0.12
+          },
+          "annual_macro_growth_pct": {
+            "type": "number",
+            "maximum": 0.5,
+            "minimum": -0.5,
+            "title": "Annual Macro Growth Pct",
+            "description": "Makro talab/iqtisodiy o'sish taxmini, masalan 0.03 = 3%",
+            "default": 0.03
+          },
+          "use_holiday_adjustments": {
+            "type": "boolean",
+            "title": "Use Holiday Adjustments",
+            "description": "Bayram va mavsumiy event flaglarini forecastga qo'shish",
+            "default": true
+          },
+          "clean_anomalies": {
+            "type": "boolean",
+            "title": "Clean Anomalies",
+            "description": "Tarixiy revenue qatoridagi keskin anomal oylarni winsorize qilish",
+            "default": true
           }
         },
         "type": "object",
         "required": [
-          "niche",
           "mcc_code"
         ],
         "title": "DemandForecastRequest"
@@ -1461,6 +1597,16 @@
               }
             ],
             "title": "Train Rmse Uzs"
+          },
+          "anomaly_count": {
+            "type": "integer",
+            "title": "Anomaly Count",
+            "default": 0
+          },
+          "new_competitor_count_recent": {
+            "type": "integer",
+            "title": "New Competitor Count Recent",
+            "default": 0
           },
           "analysis_summary": {
             "type": "string",
@@ -2173,6 +2319,683 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "ViabilityCashflowMonthOut": {
+        "properties": {
+          "month_index": {
+            "type": "integer",
+            "title": "Month Index"
+          },
+          "expected_revenue_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Expected Revenue Uzs"
+          },
+          "p10_revenue_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "P10 Revenue Uzs"
+          },
+          "p90_revenue_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "P90 Revenue Uzs"
+          },
+          "variable_cost_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Variable Cost Uzs"
+          },
+          "fixed_cost_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Fixed Cost Uzs"
+          },
+          "loan_payment_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Loan Payment Uzs"
+          },
+          "tax_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Tax Uzs"
+          },
+          "net_cashflow_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Net Cashflow Uzs"
+          },
+          "cumulative_cash_p10_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Cumulative Cash P10 Uzs"
+          },
+          "cumulative_cash_p50_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Cumulative Cash P50 Uzs"
+          },
+          "cumulative_cash_p90_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Cumulative Cash P90 Uzs"
+          },
+          "probability_negative_cash": {
+            "type": "number",
+            "title": "Probability Negative Cash"
+          },
+          "is_break_even_month": {
+            "type": "boolean",
+            "title": "Is Break Even Month"
+          }
+        },
+        "type": "object",
+        "required": [
+          "month_index",
+          "expected_revenue_uzs",
+          "p10_revenue_uzs",
+          "p90_revenue_uzs",
+          "variable_cost_uzs",
+          "fixed_cost_uzs",
+          "loan_payment_uzs",
+          "tax_uzs",
+          "net_cashflow_uzs",
+          "cumulative_cash_p10_uzs",
+          "cumulative_cash_p50_uzs",
+          "cumulative_cash_p90_uzs",
+          "probability_negative_cash",
+          "is_break_even_month"
+        ],
+        "title": "ViabilityCashflowMonthOut"
+      },
+      "ViabilityCheckRequest": {
+        "properties": {
+          "plan_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Name",
+            "description": "Biznes-plan nomi yoki scenario nomi"
+          },
+          "niche": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Niche",
+            "description": "Biznes nishasi; berilmasa mcc_code orqali aniqlanadi"
+          },
+          "mcc_code": {
+            "type": "string",
+            "maxLength": 4,
+            "minLength": 4,
+            "title": "Mcc Code",
+            "description": "MCC kod (4 raqam)"
+          },
+          "city": {
+            "type": "string",
+            "title": "City",
+            "description": "Shahar nomi",
+            "default": "Toshkent"
+          },
+          "lat": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 90,
+                "minimum": -90
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lat",
+            "description": "Latitude"
+          },
+          "lon": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 180,
+                "minimum": -180
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lon",
+            "description": "Longitude"
+          },
+          "radius_m": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 20000,
+                "minimum": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Radius M",
+            "description": "Raqobatchi va lokatsiya riskini baholash radiusi"
+          },
+          "simulation_months": {
+            "type": "integer",
+            "maximum": 36,
+            "minimum": 12,
+            "title": "Simulation Months",
+            "description": "Moliyaviy model davri; odatda 24 oy",
+            "default": 24
+          },
+          "monte_carlo_iterations": {
+            "type": "integer",
+            "maximum": 20000,
+            "minimum": 500,
+            "title": "Monte Carlo Iterations",
+            "description": "Monte Carlo simulyatsiya soni",
+            "default": 2000
+          },
+          "random_seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Random Seed",
+            "description": "Deterministik test uchun seed; productionda bermasa ham bo'ladi"
+          },
+          "initial_capital_uzs": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              }
+            ],
+            "title": "Initial Capital Uzs",
+            "description": "Boshlang'ich mavjud kapital"
+          },
+          "startup_capex_uzs": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Startup Capex Uzs",
+            "description": "Ish boshlash uchun bir martalik CAPEX"
+          },
+          "loan_amount_uzs": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              }
+            ],
+            "title": "Loan Amount Uzs",
+            "description": "Kredit summasi",
+            "default": "0"
+          },
+          "monthly_loan_payment_uzs": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              }
+            ],
+            "title": "Monthly Loan Payment Uzs",
+            "description": "Har oylik kredit to'lovi",
+            "default": "0"
+          },
+          "expected_monthly_revenue_uzs": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Monthly Revenue Uzs",
+            "description": "1-oy kutilayotgan oylik revenue"
+          },
+          "avg_ticket_uzs": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Ticket Uzs",
+            "description": "O'rtacha chek"
+          },
+          "expected_monthly_transactions": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Monthly Transactions",
+            "description": "Oylik tranzaksiyalar soni"
+          },
+          "gross_margin_pct": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMaximum": 1,
+                "exclusiveMinimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gross Margin Pct",
+            "description": "Yalpi marja, masalan 0.35 = 35%"
+          },
+          "variable_cost_pct": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMaximum": 1,
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Variable Cost Pct",
+            "description": "Revenuega nisbatan variable cost"
+          },
+          "monthly_fixed_cost_uzs": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Monthly Fixed Cost Uzs",
+            "description": "Jami oylik fixed cost"
+          },
+          "monthly_rent_uzs": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              }
+            ],
+            "title": "Monthly Rent Uzs",
+            "default": "0"
+          },
+          "monthly_payroll_uzs": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              }
+            ],
+            "title": "Monthly Payroll Uzs",
+            "default": "0"
+          },
+          "monthly_utilities_uzs": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              }
+            ],
+            "title": "Monthly Utilities Uzs",
+            "default": "0"
+          },
+          "monthly_marketing_uzs": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              }
+            ],
+            "title": "Monthly Marketing Uzs",
+            "default": "0"
+          },
+          "monthly_other_fixed_uzs": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              }
+            ],
+            "title": "Monthly Other Fixed Uzs",
+            "default": "0"
+          },
+          "owner_draw_uzs": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              }
+            ],
+            "title": "Owner Draw Uzs",
+            "description": "Founder/owner har oy biznesdan oladigan summa",
+            "default": "0"
+          },
+          "monthly_revenue_growth_pct": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 0.5,
+                "minimum": -0.5
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Monthly Revenue Growth Pct",
+            "description": "Oylik revenue o'sishi, masalan 0.015 = 1.5%"
+          },
+          "revenue_volatility_pct": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 2,
+                "minimum": 0.01
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revenue Volatility Pct",
+            "description": "Revenue noaniqligi/std, masalan 0.20 = 20%"
+          },
+          "annual_inflation_rate_pct": {
+            "type": "number",
+            "maximum": 1,
+            "minimum": -0.2,
+            "title": "Annual Inflation Rate Pct",
+            "description": "Yillik inflatsiya taxmini",
+            "default": 0.12
+          },
+          "annual_macro_growth_pct": {
+            "type": "number",
+            "maximum": 0.5,
+            "minimum": -0.5,
+            "title": "Annual Macro Growth Pct",
+            "description": "Yillik makro talab o'sishi",
+            "default": 0.03
+          },
+          "tax_rate_pct": {
+            "type": "number",
+            "maximum": 0.5,
+            "minimum": 0,
+            "title": "Tax Rate Pct",
+            "default": 0.04
+          },
+          "seasonality_profile": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "number"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seasonality Profile",
+            "description": "Oy bo'yicha seasonality: {'1': 0.95, '12': 1.15}"
+          },
+          "risk_assumptions": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Risk Assumptions",
+            "description": "Qo'shimcha risk sozlamalari"
+          },
+          "clean_anomalies": {
+            "type": "boolean",
+            "title": "Clean Anomalies",
+            "description": "Ekstremal simulyatsiya natijalarini winsorize qilish",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "mcc_code",
+          "initial_capital_uzs"
+        ],
+        "title": "ViabilityCheckRequest",
+        "description": "M-D1 Financial Viability Check request."
+      },
+      "ViabilityCheckResponse": {
+        "properties": {
+          "run_id": {
+            "type": "integer",
+            "title": "Run Id"
+          },
+          "assumption_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assumption Id"
+          },
+          "niche": {
+            "type": "string",
+            "title": "Niche"
+          },
+          "mcc_code": {
+            "type": "string",
+            "title": "Mcc Code"
+          },
+          "city": {
+            "type": "string",
+            "title": "City"
+          },
+          "simulation_months": {
+            "type": "integer",
+            "title": "Simulation Months"
+          },
+          "monte_carlo_iterations": {
+            "type": "integer",
+            "title": "Monte Carlo Iterations"
+          },
+          "break_even_month": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Break Even Month"
+          },
+          "runway_months": {
+            "type": "number",
+            "title": "Runway Months"
+          },
+          "survival_probability_24m": {
+            "type": "number",
+            "title": "Survival Probability 24M"
+          },
+          "cash_out_probability_24m": {
+            "type": "number",
+            "title": "Cash Out Probability 24M"
+          },
+          "probability_break_even_24m": {
+            "type": "number",
+            "title": "Probability Break Even 24M"
+          },
+          "median_final_cash_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Median Final Cash Uzs"
+          },
+          "p10_final_cash_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "P10 Final Cash Uzs"
+          },
+          "p90_final_cash_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "P90 Final Cash Uzs"
+          },
+          "worst_month_cash_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Worst Month Cash Uzs"
+          },
+          "min_required_capital_uzs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Min Required Capital Uzs"
+          },
+          "viability_score": {
+            "type": "number",
+            "title": "Viability Score"
+          },
+          "recommendation": {
+            "type": "string",
+            "title": "Recommendation"
+          },
+          "confidence_score": {
+            "type": "number",
+            "title": "Confidence Score"
+          },
+          "analysis_summary": {
+            "type": "string",
+            "title": "Analysis Summary"
+          },
+          "methodology_notes": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Methodology Notes"
+          },
+          "cashflow_months": {
+            "items": {
+              "$ref": "#/components/schemas/ViabilityCashflowMonthOut"
+            },
+            "type": "array",
+            "title": "Cashflow Months"
+          }
+        },
+        "type": "object",
+        "required": [
+          "run_id",
+          "assumption_id",
+          "niche",
+          "mcc_code",
+          "city",
+          "simulation_months",
+          "monte_carlo_iterations",
+          "break_even_month",
+          "runway_months",
+          "survival_probability_24m",
+          "cash_out_probability_24m",
+          "probability_break_even_24m",
+          "median_final_cash_uzs",
+          "p10_final_cash_uzs",
+          "p90_final_cash_uzs",
+          "worst_month_cash_uzs",
+          "min_required_capital_uzs",
+          "viability_score",
+          "recommendation",
+          "confidence_score",
+          "analysis_summary",
+          "methodology_notes",
+          "cashflow_months"
+        ],
+        "title": "ViabilityCheckResponse"
       }
     }
   }

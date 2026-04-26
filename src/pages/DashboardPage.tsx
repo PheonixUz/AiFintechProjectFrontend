@@ -15,9 +15,9 @@ export const DashboardPage: React.FC = () => {
 
   const blocks = [
     { id: 'A', title: 'Market Sizing', icon: <Target className={styles.iconA} />, desc: 'TAM, SAM, SOM tahlili', path: '/market-sizing' },
-    { id: 'B', title: 'Demand Forecast', icon: <TrendingUp className={styles.iconB} />, desc: 'Talabni bashorat qilish', status: 'Tez kunda' },
+    { id: 'B', title: 'Demand Forecast', icon: <TrendingUp className={styles.iconB} />, desc: 'Talabni bashorat qilish', path: '/demand-forecast' },
     { id: 'C', title: 'Location Score', icon: <MapPin className={styles.iconC} />, desc: 'Joylashuv indeksi', status: 'Tez kunda' },
-    { id: 'D', title: 'Viability Check', icon: <CheckCircle className={styles.iconD} />, desc: 'Moliyaviy hayotiylik', status: 'Tez kunda' },
+    { id: 'D', title: 'Financial Viability', icon: <CheckCircle className={styles.iconD} />, desc: 'Break-even, runway, survival (M-D1)', path: '/viability-check' },
     { id: 'E', title: 'Competitor Intel', icon: <Users className={styles.iconE} />, desc: 'Raqobatchilar tahlili', status: 'Tez kunda' },
     { id: 'F', title: 'Risk Assess', icon: <Activity className={styles.iconF} />, desc: 'Xavf-xatarlarni baholash', status: 'Tez kunda' },
     { id: 'G', title: 'Marketing ROI', icon: <BarChart2 className={styles.iconG} />, desc: 'Marketing samaradorligi', status: 'Tez kunda' },
