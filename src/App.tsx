@@ -4,6 +4,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { MarketSizingPage } from './pages/MarketSizingPage';
 import { DemandForecastPage } from './pages/DemandForecastPage';
 import { ViabilityCheckPage } from './pages/ViabilityCheckPage';
+import { ChurnPredictionPage } from './pages/ChurnPredictionPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
         <Route path="market-sizing" element={<MarketSizingPage />} />
         <Route path="demand-forecast" element={<DemandForecastPage />} />
         <Route path="viability-check" element={<ViabilityCheckPage />} />
+        <Route path="churn-prediction" element={<ChurnPredictionPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>

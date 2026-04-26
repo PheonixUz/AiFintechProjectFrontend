@@ -9,28 +9,17 @@ export interface MCCCategoryOut {
 
 /** POST /api/v1/models/demand-forecast (api_docs.json bilan sinxron) */
 export interface DemandForecastRequest {
+  /** MCC kod (4 raqam) */
   mcc_code: string;
-  /** Berilmasa yoki null — backend MCC bo‘yicha to‘ldiradi */
-  niche?: string | null;
+  /** Shahar nomi (default: "Toshkent") */
   city?: string;
   /** API: 12, 24 yoki 36 oy (integer, default 12) */
   horizon_months?: number;
-  /** 0.8 … 0.99, default 0.95 */
-  confidence_level?: number;
-  /** Local competitor pressure; alohida null qabul qilinadi */
+  /** Local competitor pressure uchun ixtiyoriy lokatsiya */
   lat?: number | null;
   lon?: number | null;
+  /** 100 … 20000 m (ixtiyoriy) */
   radius_m?: number | null;
-  /** format: date (YYYY-MM-DD), odatda oy boshlanishi kunlari */
-  start_month?: string | null;
-  /** format: date (YYYY-MM-DD) */
-  end_month?: string | null;
-  /** -0.2 … 1 (masalan 0.12 = 12%), default 0.12 */
-  annual_inflation_rate_pct?: number;
-  /** -0.5 … 0.5 (masalan 0.03 = 3%), default 0.03 */
-  annual_macro_growth_pct?: number;
-  use_holiday_adjustments?: boolean;
-  clean_anomalies?: boolean;
 }
 
 export interface DemandForecastPointOut {
@@ -279,6 +268,110 @@ export interface ValidationError {
 
 export interface HTTPValidationError {
   detail?: ValidationError[];
+}
+
+/**
+ * POST /api/v1/models/churn-prediction (M-E2)
+ * api_docs.json -> ChurnPredictionRequest bilan sinxron.
+ * Majburiy: business_id YOKI mcc_code. Qolganlari ixtiyoriy (bo‘sh bo‘lsa benchmark/feature pipeline ishlatadi).
+ */
+export type ChurnMoneyField = number | string;
+
+export interface ChurnPredictionRequest {
+  /** Mavjud biznes IDsi (>0). Berilsa backend biznesni DBdan oladi. */
+  business_id?: number | null;
+  /** 4 raqamli MCC kodi. business_id bo‘lmasa majburiy. */
+  mcc_code?: string | null;
+  /** Niche nomi. Berilmasa MCC yoki business orqali aniqlanadi. */
+  niche?: string | null;
+  city?: string;
+  district?: string | null;
+  /** -90 … 90 */
+  lat?: number | null;
+  /** -180 … 180 */
+  lon?: number | null;
+  /** 100 … 20000 m (default 1000) */
+  radius_m?: number | null;
+  /** YYYY-MM-DD. Berilmasa bugungi sana ishlatiladi. */
+  as_of_date?: string | null;
+  /** 6 … 36 oy (default 24) */
+  prediction_horizon_months?: number;
+  /** 0 … 600 */
+  business_age_months?: number | null;
+  /** 0 … 500 */
+  employee_count_est?: number | null;
+  /** 1 … 100000 */
+  area_sqm?: number | null;
+  revenue_3m_avg_uzs?: ChurnMoneyField | null;
+  revenue_6m_avg_uzs?: ChurnMoneyField | null;
+  revenue_12m_avg_uzs?: ChurnMoneyField | null;
+  /** -1 … 2 */
+  revenue_trend_6m_pct?: number | null;
+  /** 0 … 3 */
+  revenue_volatility_12m_pct?: number | null;
+  /** 0 … 1 */
+  revenue_drop_last_3m_pct?: number | null;
+  /** 0 … 12 */
+  zero_revenue_months_12m?: number | null;
+  tx_count_3m_avg?: number | null;
+  tx_count_12m_avg?: number | null;
+  /** -1 … 2 */
+  tx_count_trend_6m_pct?: number | null;
+  avg_ticket_3m_uzs?: ChurnMoneyField | null;
+  /** -1 … 2 */
+  avg_ticket_change_6m_pct?: number | null;
+  /** 0 … 90 */
+  active_days_last_90d?: number | null;
+  /** 0 … 90 */
+  inactive_days_last_90d?: number | null;
+  /** 0 … 1 */
+  online_share_12m_pct?: number | null;
+  /** 0 … 10000 */
+  competitor_count_radius?: number | null;
+  /** 0 … 1 */
+  competitor_density_score?: number | null;
+  /** 0 … 10000 */
+  nearby_closed_businesses_24m?: number | null;
+  /** 0 … 1 */
+  district_failure_rate_24m_pct?: number | null;
+  /** 0 … 1 */
+  macro_risk_score?: number | null;
+  /** 0 … 1 */
+  seasonality_risk_score?: number | null;
+  /** 0 … 1 */
+  data_quality_score?: number | null;
+}
+
+export interface ChurnRiskFactorOut {
+  rank: number;
+  factor_name: string;
+  factor_group: string;
+  factor_value?: string | null;
+  baseline_value?: string | null;
+  impact_score: number;
+  /** Masalan: "increase" / "decrease" */
+  direction: string;
+  explanation: string;
+}
+
+export interface ChurnPredictionResponse {
+  run_id: number;
+  feature_snapshot_id: number;
+  model_version_id: number | null;
+  business_id: number | null;
+  niche: string;
+  mcc_code: string;
+  city: string;
+  as_of_date: string;
+  prediction_horizon_months: number;
+  closure_probability_24m: number;
+  survival_probability_24m: number;
+  risk_bucket: string;
+  risk_score: number;
+  confidence_score: number;
+  top_factors: ChurnRiskFactorOut[];
+  prediction_summary: string;
+  methodology_notes: MethodologyNotes;
 }
 
 /** POST /api/v1/models/viability-check (M-D1, api_docs.json bilan sinxron) */

@@ -4,6 +4,7 @@ export const API_ENDPOINTS = {
   MARKET_SIZING: '/api/v1/models/market-sizing',
   DEMAND_FORECAST: '/api/v1/models/demand-forecast',
   VIABILITY_CHECK: '/api/v1/models/viability-check',
+  CHURN_PREDICTION: '/api/v1/models/churn-prediction',
   NICHES: '/api/v1/data/niches',
   BENCHMARKS: '/api/v1/data/benchmarks',
   COMPETITORS: '/api/v1/data/competitors',

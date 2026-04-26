@@ -149,6 +149,41 @@ const MetricsStrip: React.FC<{ result: DemandForecastResponse }> = ({ result }) 
   </div>
 );
 
+const isPlainObject = (v: unknown): v is Record<string, unknown> =>
+  typeof v === 'object' && v !== null && !Array.isArray(v);
+
+const MethodologyCell: React.FC<{ label: string; value: unknown }> = ({ label, value }) => {
+  if (isPlainObject(value)) {
+    const subEntries = Object.entries(value).filter(
+      ([, sv]) => sv !== undefined && sv !== null
+    );
+    return (
+      <div style={{ ...methodologyCell, gap: 8 }}>
+        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{label}</span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {subEntries.map(([sk, sv]) => (
+            <div
+              key={sk}
+              style={{ display: 'flex', justifyContent: 'space-between', gap: 8, fontSize: '0.82rem' }}
+            >
+              <span style={{ color: 'var(--text-secondary)' }}>{sk}</span>
+              <span style={{ fontWeight: 600, wordBreak: 'break-all' }}>{toDisplayValue(sv)}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div style={methodologyCell}>
+      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{label}</span>
+      <span style={{ fontWeight: 600, wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
+        {toDisplayValue(value)}
+      </span>
+    </div>
+  );
+};
+
 const MethodologyBlock: React.FC<{ notes: MethodologyNotes }> = ({ notes }) => {
   const entries = Object.entries(notes).filter(
     ([, v]) => v !== undefined && v !== null && toDisplayValue(v).trim().length > 0
@@ -174,22 +209,12 @@ const MethodologyBlock: React.FC<{ notes: MethodologyNotes }> = ({ notes }) => {
       <div style={methodologyRow}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {left.map(([k, v]) => (
-            <div key={k} style={methodologyCell}>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{k}</span>
-              <span style={{ fontWeight: 600, wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
-                {toDisplayValue(v)}
-              </span>
-            </div>
+            <MethodologyCell key={k} label={k} value={v} />
           ))}
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {right.map(([k, v]) => (
-            <div key={k} style={methodologyCell}>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{k}</span>
-              <span style={{ fontWeight: 600, wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
-                {toDisplayValue(v)}
-              </span>
-            </div>
+            <MethodologyCell key={k} label={k} value={v} />
           ))}
         </div>
       </div>
@@ -340,7 +365,7 @@ export const DemandForecastResults: React.FC = () => {
           </h2>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
             Gorizont: {result.horizon_months} oy · interval:{' '}
-            {Math.round(result.confidence_level * 100)}%
+            {toConfidencePct(result.confidence_level)}%
             <Note text="Backend qaytargan umumiy ishonch va oy kesimidagi interval darajasi." />
           </p>
         </div>

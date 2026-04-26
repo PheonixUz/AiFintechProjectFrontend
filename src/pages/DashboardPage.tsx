@@ -6,7 +6,8 @@ import { Badge } from '../components/ui/Badge';
 import { 
   Target, BarChart2, MapPin, 
   CheckCircle, Users, Activity, 
-  TrendingUp, ArrowRight, Zap 
+  TrendingUp, ArrowRight, Zap,
+  AlertTriangle,
 } from 'lucide-react';
 import styles from './DashboardPage.module.css';
 
@@ -18,7 +19,8 @@ export const DashboardPage: React.FC = () => {
     { id: 'B', title: 'Demand Forecast', icon: <TrendingUp className={styles.iconB} />, desc: 'Talabni bashorat qilish', path: '/demand-forecast' },
     { id: 'C', title: 'Location Score', icon: <MapPin className={styles.iconC} />, desc: 'Joylashuv indeksi', status: 'Tez kunda' },
     { id: 'D', title: 'Financial Viability', icon: <CheckCircle className={styles.iconD} />, desc: 'Break-even, runway, survival (M-D1)', path: '/viability-check' },
-    { id: 'E', title: 'Competitor Intel', icon: <Users className={styles.iconE} />, desc: 'Raqobatchilar tahlili', status: 'Tez kunda' },
+    { id: 'E', title: 'Churn Prediction', icon: <AlertTriangle className={styles.iconE} />, desc: '2 yil ichida yopilish ehtimoli (M-E2)', path: '/churn-prediction' },
+    { id: 'E2', title: 'Competitor Intel', icon: <Users className={styles.iconE} />, desc: 'Raqobatchilar tahlili', status: 'Tez kunda' },
     { id: 'F', title: 'Risk Assess', icon: <Activity className={styles.iconF} />, desc: 'Xavf-xatarlarni baholash', status: 'Tez kunda' },
     { id: 'G', title: 'Marketing ROI', icon: <BarChart2 className={styles.iconG} />, desc: 'Marketing samaradorligi', status: 'Tez kunda' },
   ];

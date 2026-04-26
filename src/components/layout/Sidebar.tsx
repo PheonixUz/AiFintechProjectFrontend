@@ -8,6 +8,7 @@ import {
   Target,
   TrendingUp,
   Wallet,
+  AlertTriangle,
 } from 'lucide-react';
 import styles from './Sidebar.module.css';
 
@@ -22,6 +23,7 @@ export const Sidebar: React.FC = () => {
     { path: '/market-sizing', label: 'Market Sizing', icon: <Target size={20} /> },
     { path: '/demand-forecast', label: 'Demand Forecast', icon: <TrendingUp size={20} /> },
     { path: '/viability-check', label: 'Financial Viability', icon: <Wallet size={20} /> },
+    { path: '/churn-prediction', label: 'Churn Prediction', icon: <AlertTriangle size={20} /> },
   ];
 
   return (
